@@ -4,7 +4,7 @@ import { useAuth } from '@/context/AuthContext';
 import PreAlarmDialog from '@/components/PreAlarmDialog';
 import SOSAlarm from '@/components/SOSAlarm';
 import { toast, Toaster } from "sonner";
-import { MoreHorizontal, Send, Battery, MapPin } from "lucide-react";
+import { MoreHorizontal, Send, Battery, MapPin, Play, Pause, Bell, BellRing, AlertTriangle } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -99,6 +99,13 @@ export default function Home() {
     showToast("Location Sent", "success", "Your current location has been sent.");
   };
 
+  const renderButtonContent = (icon, text) => (
+    <>
+      {icon}
+      <span className="mt-2">{text}</span>
+    </>
+  );
+
   return (
     <div className="flex flex-col min-h-screen bg-gray-900 text-white p-4">
       <Toaster richColors />
@@ -123,25 +130,44 @@ export default function Home() {
           <Button
             onClick={toggleLocationMonitoring}
             variant={isLocationMonitoring ? "destructive" : "default"}
-            className={isLocationMonitoring ? "bg-gray-500" : "bg-green-500 h-20"}
+            className={`${isLocationMonitoring ? 'bg-gray-500' : 'bg-green-500'} h-32 text-lg flex flex-col items-center justify-center`}
           >
-            {isLocationMonitoring ? 'Stop Monitoring' : 'Shift Monitoring'}
+            {renderButtonContent(
+              isLocationMonitoring ? <Pause className="w-16 h-16 mb-2" /> : <Play className="w-16 h-16 mb-2" />,
+              isLocationMonitoring ? 'Stop Monitoring' : 'Shift Monitoring'
+            )}
           </Button>
 
-          <Button onClick={handleStartPreAlarm} variant="default" className="bg-blue-500 h-20 text-lg">
-            Start Pre-Alarm
+          <Button 
+            onClick={handleStartPreAlarm} 
+            variant="default" 
+            className="bg-blue-500 h-32 text-lg flex flex-col items-center justify-center"
+          >
+            {renderButtonContent(<Bell className="w-16 h-16 mb-2" />, 'Start Pre-Alarm')}
           </Button>
 
-          <Button onClick={handleExtendPreAlarm} variant="default" className="bg-yellow-500 h-20 text-lg">
-            Extend Pre-Alarm
+          <Button 
+            onClick={handleExtendPreAlarm} 
+            variant="default" 
+            className="bg-yellow-500 h-32 text-lg flex flex-col items-center justify-center"
+          >
+            {renderButtonContent(<BellRing className="w-16 h-16 mb-2" />, 'Extend Pre-Alarm')}
           </Button>
 
-          <Button onClick={handleSOSAlarm} variant="destructive" className="bg-red-500 h-20 text-lg">
-            SOS Alarm
+          <Button 
+            onClick={handleSOSAlarm} 
+            variant="destructive" 
+            className="bg-red-500 h-32 text-lg flex flex-col items-center justify-center"
+          >
+            {renderButtonContent(<AlertTriangle className="w-16 h-16 mb-2" />, 'SOS Alarm')}
           </Button>
 
-          <Button onClick={handleSendLocation} variant="outline" className="bg-gray-700 h-20 text-lg">
-            <Send className="mr-2 h-4 w-4" /> Send Location
+          <Button 
+            onClick={handleSendLocation} 
+            variant="outline" 
+            className="bg-gray-700 h-32 text-lg flex flex-col items-center justify-center col-span-2"
+          >
+            {renderButtonContent(<Send className="w-16 h-16 mb-2" />, 'Send Location')}
           </Button>
         </div>
 
