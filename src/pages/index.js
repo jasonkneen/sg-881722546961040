@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from '@/context/AuthContext';
 import PreAlarmDialog from '@/components/PreAlarmDialog';
 import SOSAlarm from '@/components/SOSAlarm';
-import { toast } from "sonner";
+import { toast, Toaster } from "sonner";
 import { MoreHorizontal, Send, Battery } from "lucide-react";
 import {
   DropdownMenu,
@@ -33,22 +33,42 @@ export default function Home() {
         },
         error => {
           console.error("Error getting location:", error);
-          toast.error("Unable to get your location. Please check your settings.", {
-            duration: 2000,
-          });
+          showToast("Unable to get your location. Please check your settings.", "error");
         }
       );
       return () => navigator.geolocation.clearWatch(watchId);
     }
   }, [isLocationMonitoring]);
 
+  const showToast = (message, type = "default", description = "") => {
+    const toastOptions = {
+      duration: 2000,
+      closeButton: true,
+    };
+
+    switch (type) {
+      case "success":
+        toast.success(message, { ...toastOptions, description });
+        break;
+      case "error":
+        toast.error(message, { ...toastOptions, description });
+        break;
+      case "info":
+        toast.info(message, { ...toastOptions, description });
+        break;
+      default:
+        toast(message, { ...toastOptions, description });
+    }
+  };
+
   const toggleLocationMonitoring = () => {
     setIsLocationMonitoring(!isLocationMonitoring);
     setStatus(isLocationMonitoring ? 'Idle' : 'Monitoring');
-    toast.success(isLocationMonitoring ? "Monitoring Stopped" : "Monitoring Started", {
-      description: isLocationMonitoring ? "Location monitoring has been stopped." : "Your location is now being monitored.",
-      duration: 2000,
-    });
+    showToast(
+      isLocationMonitoring ? "Monitoring Stopped" : "Monitoring Started",
+      "success",
+      isLocationMonitoring ? "Location monitoring has been stopped." : "Your location is now being monitored."
+    );
   };
 
   const handleStartPreAlarm = () => {
@@ -57,31 +77,23 @@ export default function Home() {
 
   const handleExtendPreAlarm = () => {
     // TODO: Implement extend pre-alarm logic
-    toast.info("Pre-Alarm Extended", {
-      description: "The pre-alarm duration has been extended.",
-      duration: 2000,
-    });
+    showToast("Pre-Alarm Extended", "info", "The pre-alarm duration has been extended.");
   };
 
   const handleSOSAlarm = () => {
     setIsSOSAlarmActive(true);
     // TODO: Implement server-side SOS alert
-    toast.error("SOS Alarm Activated", {
-      description: "Emergency services have been notified.",
-      duration: 2000,
-    });
+    showToast("SOS Alarm Activated", "error", "Emergency services have been notified.");
   };
 
   const handleSendLocation = () => {
     // TODO: Implement send location logic
-    toast.success("Location Sent", {
-      description: "Your current location has been sent.",
-      duration: 2000,
-    });
+    showToast("Location Sent", "success", "Your current location has been sent.");
   };
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-900 text-white p-4">
+      <Toaster richColors />
       <header className="flex justify-between items-center mb-8">
         <h1 className="text-2xl font-bold">Gemini Locator</h1>
         <div className="flex items-center">
