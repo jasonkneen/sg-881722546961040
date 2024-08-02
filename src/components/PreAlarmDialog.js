@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 
 const timeOptions = [
   { label: '5 MINS', value: 5 },
@@ -16,10 +17,12 @@ const timeOptions = [
 export default function PreAlarmDialog({ open, onOpenChange }) {
   const [selectedTime, setSelectedTime] = useState(null);
   const [customTime, setCustomTime] = useState('');
+  const [details, setDetails] = useState('');
 
   const handleStartPreAlarm = () => {
     const duration = selectedTime || parseInt(customTime, 10);
-    // TODO: Implement pre-alarm start logic
+    // TODO: Implement pre-alarm start logic with duration and details
+    console.log("Starting pre-alarm for", duration, "minutes with details:", details);
     onOpenChange(false);
   };
 
@@ -49,6 +52,16 @@ export default function PreAlarmDialog({ open, onOpenChange }) {
               value={customTime}
               onChange={(e) => setCustomTime(e.target.value)}
               className="col-span-2"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="details">Additional Details:</Label>
+            <Textarea
+              id="details"
+              placeholder="Enter any additional information here..."
+              value={details}
+              onChange={(e) => setDetails(e.target.value)}
+              className="h-24"
             />
           </div>
         </div>
