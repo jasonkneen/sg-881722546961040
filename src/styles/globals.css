@@ -13,8 +13,8 @@
     --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
  
-    --primary: 217.2 91.2% 59.8%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    --primary: 142.1 76.2% 36.3%;
+    --primary-foreground: 355.7 100% 97.3%;
  
     --secondary: 217.2 32.6% 17.5%;
     --secondary-foreground: 210 40% 98%;
@@ -43,4 +43,36 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+
+.bg-green-500 {
+  background-color: #10B981;
+}
+
+.bg-blue-500 {
+  background-color: #3B82F6;
+}
+
+.bg-yellow-500 {
+  background-color: #F59E0B;
+}
+
+.bg-red-500 {
+  background-color: #EF4444;
+}
+
+.bg-gray-500 {
+  background-color: #6B7280;
+}
+
+.bg-gray-700 {
+  background-color: #374151;
+}
+
+.bg-gray-800 {
+  background-color: #1F2937;
+}
+
+.bg-gray-900 {
+  background-color: #111827;
 }
