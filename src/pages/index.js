@@ -4,7 +4,7 @@ import { useAuth } from '@/context/AuthContext';
 import PreAlarmDialog from '@/components/PreAlarmDialog';
 import SOSAlarm from '@/components/SOSAlarm';
 import { toast, Toaster } from "sonner";
-import { MoreHorizontal, Send, Battery } from "lucide-react";
+import { MoreHorizontal, Send, Battery, MapPin } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,7 +19,7 @@ export default function Home() {
   const [isPreAlarmDialogOpen, setIsPreAlarmDialogOpen] = useState(false);
   const [isSOSAlarmActive, setIsSOSAlarmActive] = useState(false);
   const [location, setLocation] = useState(null);
-  const [connectionStatus, setConnectionStatus] = useState({ status: 'Connected', percentage: 75 });
+  const [batteryLevel, setBatteryLevel] = useState(75);
 
   useEffect(() => {
     if (isLocationMonitoring) {
@@ -39,6 +39,14 @@ export default function Home() {
       return () => navigator.geolocation.clearWatch(watchId);
     }
   }, [isLocationMonitoring]);
+
+  useEffect(() => {
+    // Simulating battery level updates
+    const interval = setInterval(() => {
+      setBatteryLevel(prevLevel => Math.max(0, Math.min(100, prevLevel + Math.floor(Math.random() * 5) - 2)));
+    }, 10000);
+    return () => clearInterval(interval);
+  }, []);
 
   const showToast = (message, type = "default", description = "") => {
     const toastOptions = {
@@ -96,11 +104,17 @@ export default function Home() {
       <Toaster richColors />
       <header className="flex justify-between items-center mb-8">
         <h1 className="text-2xl font-bold">Gemini Locator</h1>
-        <div className="flex items-center">
-          <Battery className="mr-2" />
-          <span className={`font-bold ${connectionStatus.status === 'Connected' ? 'text-green-500' : 'text-red-500'}`}>
-            {connectionStatus.status} ({connectionStatus.percentage}%)
-          </span>
+        <div className="flex items-center space-x-4">
+          <div className="flex items-center">
+            <Battery className="mr-1" />
+            <span className="font-bold">{batteryLevel}%</span>
+          </div>
+          <div className="flex items-center">
+            <MapPin className={`mr-1 ${isLocationMonitoring ? 'text-green-500' : 'text-gray-500'}`} />
+            <span className={`font-bold ${isLocationMonitoring ? 'text-green-500' : 'text-gray-500'}`}>
+              {isLocationMonitoring ? 'On' : 'Off'}
+            </span>
+          </div>
         </div>
       </header>
 
