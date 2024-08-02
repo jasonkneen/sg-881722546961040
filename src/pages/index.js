@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from '@/context/AuthContext';
 import PreAlarmDialog from '@/components/PreAlarmDialog';
 import SOSAlarm from '@/components/SOSAlarm';
-import { useToast } from "@/components/ui/use-toast";
+import { toast } from "sonner";
 import { MoreHorizontal, Send, Battery } from "lucide-react";
 import {
   DropdownMenu,
@@ -20,7 +20,6 @@ export default function Home() {
   const [isSOSAlarmActive, setIsSOSAlarmActive] = useState(false);
   const [location, setLocation] = useState(null);
   const [connectionStatus, setConnectionStatus] = useState({ status: 'Connected', percentage: 75 });
-  const { toast } = useToast();
 
   useEffect(() => {
     if (isLocationMonitoring) {
@@ -34,10 +33,8 @@ export default function Home() {
         },
         error => {
           console.error("Error getting location:", error);
-          toast({
-            title: "Location Error",
-            description: "Unable to get your location. Please check your settings.",
-            variant: "destructive",
+          toast.error("Unable to get your location. Please check your settings.", {
+            duration: 2000,
           });
         }
       );
@@ -48,9 +45,9 @@ export default function Home() {
   const toggleLocationMonitoring = () => {
     setIsLocationMonitoring(!isLocationMonitoring);
     setStatus(isLocationMonitoring ? 'Idle' : 'Monitoring');
-    toast({
-      title: isLocationMonitoring ? "Monitoring Stopped" : "Monitoring Started",
+    toast.success(isLocationMonitoring ? "Monitoring Stopped" : "Monitoring Started", {
       description: isLocationMonitoring ? "Location monitoring has been stopped." : "Your location is now being monitored.",
+      duration: 2000,
     });
   };
 
@@ -60,27 +57,26 @@ export default function Home() {
 
   const handleExtendPreAlarm = () => {
     // TODO: Implement extend pre-alarm logic
-    toast({
-      title: "Pre-Alarm Extended",
+    toast.info("Pre-Alarm Extended", {
       description: "The pre-alarm duration has been extended.",
+      duration: 2000,
     });
   };
 
   const handleSOSAlarm = () => {
     setIsSOSAlarmActive(true);
     // TODO: Implement server-side SOS alert
-    toast({
-      title: "SOS Alarm Activated",
+    toast.error("SOS Alarm Activated", {
       description: "Emergency services have been notified.",
-      variant: "destructive",
+      duration: 2000,
     });
   };
 
   const handleSendLocation = () => {
     // TODO: Implement send location logic
-    toast({
-      title: "Location Sent",
+    toast.success("Location Sent", {
       description: "Your current location has been sent.",
+      duration: 2000,
     });
   };
 
