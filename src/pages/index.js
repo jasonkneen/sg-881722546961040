@@ -123,24 +123,24 @@ export default function Home() {
           <Button
             onClick={toggleLocationMonitoring}
             variant={isLocationMonitoring ? "destructive" : "default"}
-            className={isLocationMonitoring ? "bg-gray-500" : "bg-green-500"}
+            className={isLocationMonitoring ? "bg-gray-500" : "bg-green-500 h-20"}
           >
             {isLocationMonitoring ? 'Stop Monitoring' : 'Shift Monitoring'}
           </Button>
 
-          <Button onClick={handleStartPreAlarm} variant="default" className="bg-blue-500">
+          <Button onClick={handleStartPreAlarm} variant="default" className="bg-blue-500 h-20 text-lg">
             Start Pre-Alarm
           </Button>
 
-          <Button onClick={handleExtendPreAlarm} variant="default" className="bg-yellow-500">
+          <Button onClick={handleExtendPreAlarm} variant="default" className="bg-yellow-500 h-20 text-lg">
             Extend Pre-Alarm
           </Button>
 
-          <Button onClick={handleSOSAlarm} variant="destructive" className="bg-red-500">
+          <Button onClick={handleSOSAlarm} variant="destructive" className="bg-red-500 h-20 text-lg">
             SOS Alarm
           </Button>
 
-          <Button onClick={handleSendLocation} variant="outline" className="bg-gray-700">
+          <Button onClick={handleSendLocation} variant="outline" className="bg-gray-700 h-20 text-lg">
             <Send className="mr-2 h-4 w-4" /> Send Location
           </Button>
         </div>
