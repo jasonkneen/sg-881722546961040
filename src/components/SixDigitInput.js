@@ -32,7 +32,7 @@ const SixDigitInput = ({ onComplete }) => {
   };
 
   return (
-    <div className="flex justify-between max-w-xs mx-auto">
+    <div className="flex justify-between space-x-2">
       {code.map((digit, index) => (
         <Input
           key={index}
@@ -43,7 +43,7 @@ const SixDigitInput = ({ onComplete }) => {
           value={digit}
           onChange={e => handleChange(index, e.target.value)}
           onKeyDown={e => handleKeyDown(index, e)}
-          className="w-12 h-12 text-center text-lg font-bold"
+          className="w-10 h-12 text-center text-lg font-bold"
         />
       ))}
     </div>

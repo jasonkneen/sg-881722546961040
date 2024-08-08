@@ -101,7 +101,9 @@ export default function Home() {
 
   const renderButtonContent = (icon, text) => (
     <>
-      {icon}
+      <div className="mt-2">
+        {icon}
+      </div>
       <span className="mt-2">{text}</span>
     </>
   );
@@ -130,10 +132,10 @@ export default function Home() {
           <Button
             onClick={toggleLocationMonitoring}
             variant={isLocationMonitoring ? "destructive" : "default"}
-            className={`${isLocationMonitoring ? 'bg-gray-500' : 'bg-green-500'} h-32 text-lg flex flex-col items-center justify-center`}
+            className={`${isLocationMonitoring ? 'bg-gray-500' : 'bg-green-500'} h-28 text-lg flex flex-col items-center justify-center`}
           >
             {renderButtonContent(
-              isLocationMonitoring ? <Pause className="w-16 h-16 mb-2" /> : <Play className="w-16 h-16 mb-2" />,
+              isLocationMonitoring ? <Pause className="w-12 h-12" /> : <Play className="w-12 h-12" />,
               isLocationMonitoring ? 'Stop Monitoring' : 'Shift Monitoring'
             )}
           </Button>
@@ -141,33 +143,33 @@ export default function Home() {
           <Button 
             onClick={handleStartPreAlarm} 
             variant="default" 
-            className="bg-blue-500 h-32 text-lg flex flex-col items-center justify-center"
+            className="bg-blue-500 h-28 text-lg flex flex-col items-center justify-center"
           >
-            {renderButtonContent(<Bell className="w-16 h-16 mb-2" />, 'Start Pre-Alarm')}
+            {renderButtonContent(<Bell className="w-12 h-12" />, 'Start Pre-Alarm')}
           </Button>
 
           <Button 
             onClick={handleExtendPreAlarm} 
             variant="default" 
-            className="bg-yellow-500 h-32 text-lg flex flex-col items-center justify-center"
+            className="bg-yellow-500 h-28 text-lg flex flex-col items-center justify-center"
           >
-            {renderButtonContent(<BellRing className="w-16 h-16 mb-2" />, 'Extend Pre-Alarm')}
+            {renderButtonContent(<BellRing className="w-12 h-12" />, 'Extend Pre-Alarm')}
           </Button>
 
           <Button 
             onClick={handleSOSAlarm} 
             variant="destructive" 
-            className="bg-red-500 h-32 text-lg flex flex-col items-center justify-center"
+            className="bg-red-500 h-28 text-lg flex flex-col items-center justify-center"
           >
-            {renderButtonContent(<AlertTriangle className="w-16 h-16 mb-2" />, 'SOS Alarm')}
+            {renderButtonContent(<AlertTriangle className="w-12 h-12" />, 'SOS Alarm')}
           </Button>
 
           <Button 
             onClick={handleSendLocation} 
             variant="outline" 
-            className="bg-gray-700 h-32 text-lg flex flex-col items-center justify-center col-span-2"
+            className="bg-gray-700 h-28 text-lg flex flex-col items-center justify-center col-span-2"
           >
-            {renderButtonContent(<Send className="w-16 h-16 mb-2" />, 'Send Location')}
+            {renderButtonContent(<Send className="w-12 h-12" />, 'Send Location')}
           </Button>
         </div>
 

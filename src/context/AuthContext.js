@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react';
+import { useRouter } from 'next/router';
 
 const AuthContext = createContext();
 
@@ -6,6 +7,7 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const router = useRouter();
 
   useEffect(() => {
     // TODO: Check if user is already authenticated
@@ -26,8 +28,8 @@ export function AuthProvider({ children }) {
   };
 
   const logout = () => {
-    // TODO: Implement logout logic
     setUser(null);
+    router.push('/login');
   };
 
   const sendVerificationCode = async (phoneNumber) => {
