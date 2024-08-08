@@ -39,6 +39,7 @@ export default function PreAlarmDialog({ open, onOpenChange }) {
                 key={option.value}
                 onClick={() => setSelectedTime(option.value)}
                 variant={selectedTime === option.value ? "secondary" : "outline"}
+                className="button-icon"
               >
                 {option.label}
               </Button>

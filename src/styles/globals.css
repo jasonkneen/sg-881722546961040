@@ -77,6 +77,15 @@
   background-color: #111827;
 }
 
+/* Updated styles for buttons and icons */
+.button-icon {
+  @apply w-12 h-12 mt-2;
+}
+
+.button-container {
+  @apply h-28 text-lg flex flex-col items-center justify-center;
+}
+
 /* Add styles for the 6-digit input */
 .six-digit-input input {
   width: 2.5rem;
