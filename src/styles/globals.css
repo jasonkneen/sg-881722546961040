@@ -76,3 +76,21 @@
 .bg-gray-900 {
   background-color: #111827;
 }
+
+/* Add styles for the 6-digit input */
+.six-digit-input input {
+  width: 2.5rem;
+  height: 2.5rem;
+  text-align: center;
+  font-size: 1.25rem;
+  border-radius: 0.375rem;
+  border: 1px solid #374151;
+  background-color: #1F2937;
+  color: #F9FAFB;
+}
+
+.six-digit-input input:focus {
+  outline: none;
+  border-color: #3B82F6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5);
+}
