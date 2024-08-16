@@ -11,15 +11,13 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import AIChatHistory from '@/components/Ref'; // Import the AIChatHistory component
 
 export default function Home() {
   const { user, logout } = useAuth();
-  const [status, setStatus] = useState('IDLE');
+  const [status, setStatus] = useState('Idle');
   const [isLocationMonitoring, setIsLocationMonitoring] = useState(false);
   const [isPreAlarmDialogOpen, setIsPreAlarmDialogOpen] = useState(false);
   const [isSOSAlarmActive, setIsSOSAlarmActive] = useState(false);
-  const [isPreAlarmActive, setIsPreAlarmActive] = useState(false);
   const [location, setLocation] = useState(null);
   const [batteryLevel, setBatteryLevel] = useState(75);
 
@@ -73,7 +71,7 @@ export default function Home() {
 
   const toggleLocationMonitoring = () => {
     setIsLocationMonitoring(!isLocationMonitoring);
-    setStatus(isLocationMonitoring ? 'IDLE' : 'MONITORING');
+    setStatus(isLocationMonitoring ? 'Idle' : 'Monitoring');
     showToast(
       isLocationMonitoring ? "Monitoring Stopped" : "Monitoring Started",
       "success",
@@ -81,24 +79,8 @@ export default function Home() {
     );
   };
 
-  const handlePreAlarm = () => {
-    if (isPreAlarmActive) {
-      // Stop Pre-Alarm
-      setIsPreAlarmActive(false);
-      setStatus(isLocationMonitoring ? 'MONITORING' : 'IDLE');
-      showToast("Pre-Alarm Stopped", "info", "The pre-alarm has been deactivated.");
-    } else {
-      // Open Pre-Alarm Dialog
-      setIsPreAlarmDialogOpen(true);
-    }
-  };
-
-  const handlePreAlarmConfirm = (endTime) => {
-    // This function will be called when the user confirms in the PreAlarmDialog
-    setIsPreAlarmActive(true);
-    setStatus('PRE-ALARM');
-    setIsPreAlarmDialogOpen(false);
-    showToast("Pre-Alarm Started", "info", `The pre-alarm has been activated until ${endTime}.`);
+  const handleStartPreAlarm = () => {
+    setIsPreAlarmDialogOpen(true);
   };
 
   const handleExtendPreAlarm = () => {
@@ -108,18 +90,13 @@ export default function Home() {
 
   const handleSOSAlarm = () => {
     setIsSOSAlarmActive(true);
-    setStatus('SOS');
     // TODO: Implement server-side SOS alert
     showToast("SOS Alarm Activated", "error", "Emergency services have been notified.");
   };
 
   const handleSendLocation = () => {
-    if (location) {
-      // TODO: Implement send location logic
-      showToast("Location Sent", "success", "Your current location has been sent.");
-    } else {
-      showToast("Location Unavailable", "error", "Unable to send location. Please ensure location monitoring is enabled.");
-    }
+    // TODO: Implement send location logic
+    showToast("Location Sent", "success", "Your current location has been sent.");
   };
 
   const renderButtonContent = (icon, text) => (
@@ -132,7 +109,7 @@ export default function Home() {
   return (
     <div className="flex flex-col min-h-screen bg-gray-900 text-white p-4">
       <Toaster richColors />
-      <header className="flex justify-between items-center mb-4">
+      <header className="flex justify-between items-center mb-8">
         <h1 className="text-2xl font-bold">Gemini Locator</h1>
         <div className="flex items-center space-x-4">
           <div className="flex items-center">
@@ -148,16 +125,6 @@ export default function Home() {
         </div>
       </header>
 
-      {/* New Status Bar */}
-      <div className={`w-full p-4 mb-4 text-center text-2xl font-bold rounded-lg ${
-        status === 'IDLE' ? 'bg-gray-700' :
-        status === 'MONITORING' ? 'bg-green-600' :
-        status === 'PRE-ALARM' ? 'bg-yellow-600' :
-        status === 'SOS' ? 'bg-red-600' : 'bg-gray-700'
-      }`}>
-        {status}
-      </div>
-
       <main className="flex-grow flex flex-col gap-4">
         <div className="grid grid-cols-2 gap-4">
           <Button
@@ -166,20 +133,17 @@ export default function Home() {
             className={`${isLocationMonitoring ? 'bg-gray-500' : 'bg-green-500'} h-32 text-lg flex flex-col items-center justify-center`}
           >
             {renderButtonContent(
-              isLocationMonitoring ? <Pause className="w-12 h-12 mb-2" /> : <Play className="w-16 h-16 mb-2" />,
+              isLocationMonitoring ? <Pause className="w-16 h-16 mb-2" /> : <Play className="w-16 h-16 mb-2" />,
               isLocationMonitoring ? 'Stop Monitoring' : 'Shift Monitoring'
             )}
           </Button>
 
           <Button 
-            onClick={handlePreAlarm} 
-            variant={isPreAlarmActive ? "destructive" : "default"}
-            className={`${isPreAlarmActive ? 'bg-red-500' : 'bg-blue-500'} h-32 text-lg flex flex-col items-center justify-center`}
+            onClick={handleStartPreAlarm} 
+            variant="default" 
+            className="bg-blue-500 h-32 text-lg flex flex-col items-center justify-center"
           >
-            {renderButtonContent(
-              isPreAlarmActive ? <BellRing className="w-16 h-16 mb-2" /> : <Bell className="w-16 h-16 mb-2" />,
-              isPreAlarmActive ? 'Stop Pre-Alarm' : 'Set Pre-Alarm'
-            )}
+            {renderButtonContent(<Bell className="w-16 h-16 mb-2" />, 'Start Pre-Alarm')}
           </Button>
 
           <Button 
@@ -202,7 +166,6 @@ export default function Home() {
             onClick={handleSendLocation} 
             variant="outline" 
             className="bg-gray-700 h-32 text-lg flex flex-col items-center justify-center col-span-2"
-            disabled={!isLocationMonitoring}
           >
             {renderButtonContent(<Send className="w-16 h-16 mb-2" />, 'Send Location')}
           </Button>
@@ -236,26 +199,13 @@ export default function Home() {
 
       <PreAlarmDialog
         open={isPreAlarmDialogOpen}
-        onOpenChange={(open) => {
-          setIsPreAlarmDialogOpen(open);
-          if (!open && !isPreAlarmActive) {
-            // Only reset status if dialog is closed without activating pre-alarm
-            setStatus(isLocationMonitoring ? 'MONITORING' : 'IDLE');
-          }
-        }}
-        onConfirm={handlePreAlarmConfirm}
+        onOpenChange={setIsPreAlarmDialogOpen}
       />
 
       <SOSAlarm
         isActive={isSOSAlarmActive}
-        onDeactivate={() => {
-          setIsSOSAlarmActive(false);
-          setStatus(isLocationMonitoring ? 'MONITORING' : 'IDLE');
-        }}
+        onDeactivate={() => setIsSOSAlarmActive(false)}
       />
-
-      {/* AIChatHistory component */}
-      <AIChatHistory />
     </div>
   );
 }
