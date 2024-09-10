@@ -11,9 +11,11 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useRouter } from 'next/router';
 
 export default function Home() {
   const { user, logout } = useAuth();
+  const router = useRouter();
   const [status, setStatus] = useState('Idle');
   const [isLocationMonitoring, setIsLocationMonitoring] = useState(false);
   const [isPreAlarmDialogOpen, setIsPreAlarmDialogOpen] = useState(false);
@@ -106,6 +108,16 @@ export default function Home() {
     </>
   );
 
+  const handleLogout = async () => {
+    try {
+      await logout();
+      router.push('/login');
+    } catch (error) {
+      console.error("Logout failed:", error);
+      showToast("Logout failed. Please try again.", "error");
+    }
+  };
+
   return (
     <div className="flex flex-col min-h-screen bg-gray-900 text-white p-4">
       <Toaster richColors />
@@ -182,7 +194,7 @@ export default function Home() {
       </main>
 
       <footer className="mt-8 flex justify-between items-center">
-        <Button onClick={logout} variant="ghost">Logout</Button>
+        <Button onClick={handleLogout} variant="ghost">Logout</Button>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" className="bg-gray-700">
