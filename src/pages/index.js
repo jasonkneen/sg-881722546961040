@@ -178,27 +178,19 @@ export default function Home() {
           </Button>
 
           <Button 
-            onClick={handleExtendPreAlarm} 
-            variant="default" 
-            className="bg-yellow-500 hover:bg-yellow-600 h-32 flex flex-col items-center justify-center rounded-lg font-bold text-white transition-colors duration-200 shadow-lg"
-          >
-            {renderButtonContent(<BellRing className="w-16 h-16 mb-2" />, <span className="text-[0.98em]">Extend Pre-Alarm</span>)}
-          </Button>
-
-          <Button 
-            onClick={handleSendLocation} 
-            variant="outline" 
-            className="bg-gray-800 hover:bg-gray-700 h-32 flex flex-col items-center justify-center rounded-lg font-bold text-white transition-colors duration-200 shadow-lg"
-          >
-            {renderButtonContent(<Send className="w-16 h-16 mb-2" />, <span className="text-[0.98em]">Send Location</span>)}
-          </Button>
-
-          <Button 
             onClick={handleSOSAlarm} 
             variant="destructive" 
             className="bg-red-500 hover:bg-red-600 h-32 flex flex-col items-center justify-center col-span-2 rounded-lg font-bold text-white transition-colors duration-200 shadow-lg"
           >
             {renderButtonContent(<AlertTriangle className="w-16 h-16 mb-2" />, <span className="text-[0.98em]">SOS Alarm</span>)}
+          </Button>
+
+          <Button 
+            onClick={handleExtendPreAlarm} 
+            variant="default" 
+            className="bg-yellow-500 hover:bg-yellow-600 h-32 flex flex-col items-center justify-center col-span-2 rounded-lg font-bold text-white transition-colors duration-200 shadow-lg"
+          >
+            {renderButtonContent(<BellRing className="w-16 h-16 mb-2" />, <span className="text-[0.98em]">Extend Pre-Alarm</span>)}
           </Button>
         </div>
 
