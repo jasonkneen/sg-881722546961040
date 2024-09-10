@@ -146,11 +146,11 @@ export default function Home() {
                 <Menu className="h-6 w-6" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent>
-              <DropdownMenuItem>Settings</DropdownMenuItem>
-              <DropdownMenuItem>Help</DropdownMenuItem>
-              <DropdownMenuItem>About</DropdownMenuItem>
-              <DropdownMenuItem onClick={handleLogout}>Logout</DropdownMenuItem>
+            <DropdownMenuContent className="bg-gray-600">
+              <DropdownMenuItem className="hover:bg-gray-500">Settings</DropdownMenuItem>
+              <DropdownMenuItem className="hover:bg-gray-500">Help</DropdownMenuItem>
+              <DropdownMenuItem className="hover:bg-gray-500">About</DropdownMenuItem>
+              <DropdownMenuItem onClick={handleLogout} className="hover:bg-gray-500">Logout</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
