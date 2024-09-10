@@ -21,6 +21,7 @@ export default function Home() {
   const [isPreAlarmDialogOpen, setIsPreAlarmDialogOpen] = useState(false);
   const [isSOSAlarmActive, setIsSOSAlarmActive] = useState(false);
   const [location, setLocation] = useState(null);
+  const [isPreAlarmActive, setIsPreAlarmActive] = useState(false);
 
   useEffect(() => {
     if (isLocationMonitoring) {
@@ -76,6 +77,16 @@ export default function Home() {
     setIsPreAlarmDialogOpen(true);
   };
 
+  const handlePreAlarmStart = () => {
+    setIsPreAlarmActive(true);
+    // Any other logic for starting the pre-alarm
+  };
+
+  const handlePreAlarmEnd = () => {
+    setIsPreAlarmActive(false);
+    // Any other logic for ending the pre-alarm
+  };
+
   const handleExtendPreAlarm = () => {
     // TODO: Implement extend pre-alarm logic
     showToast("Pre-Alarm Extended", "info", "The pre-alarm duration has been extended.");
@@ -118,7 +129,11 @@ export default function Home() {
           <h1 className="text-2xl font-bold">Gemini Locator</h1>
         </div>
         <div className="flex items-center">
-          <MapPin className={`mr-1 ${isLocationMonitoring ? 'text-green-500' : 'text-gray-500'}`} />
+          {isLocationMonitoring ? (
+            <BellRing className="mr-1 text-green-500 animate-ring" />
+          ) : (
+            <MapPin className="mr-1 text-gray-500" />
+          )}
           <span className={`font-bold ${isLocationMonitoring ? 'text-green-500' : 'text-gray-500'}`}>
             {isLocationMonitoring ? 'On' : 'Off'}
           </span>
@@ -130,7 +145,7 @@ export default function Home() {
           <Button
             onClick={toggleLocationMonitoring}
             variant={isLocationMonitoring ? "destructive" : "default"}
-            className={`${isLocationMonitoring ? 'bg-red-500' : 'bg-green-500'} h-32 text-lg flex flex-col items-center justify-center rounded-lg font-bold text-white`}
+            className={`${isLocationMonitoring ? 'bg-green-500' : 'bg-[#757575]'} h-32 text-lg flex flex-col items-center justify-center rounded-lg font-bold text-white`}
           >
             {renderButtonContent(
               isLocationMonitoring ? <Pause className="w-20 h-20 mb-2" /> : <Play className="w-20 h-20 mb-2" />,
@@ -141,7 +156,7 @@ export default function Home() {
           <Button 
             onClick={handleStartPreAlarm} 
             variant="default" 
-            className="bg-blue-500 h-32 text-lg flex flex-col items-center justify-center rounded-lg font-bold text-white"
+            className={`${isPreAlarmActive ? 'bg-green-500' : 'bg-[#757575]'} h-32 text-lg flex flex-col items-center justify-center rounded-lg font-bold text-white`}
           >
             {renderButtonContent(<Bell className="w-20 h-20 mb-2" />, 'Start Pre-Alarm')}
           </Button>
@@ -200,6 +215,8 @@ export default function Home() {
       <PreAlarmDialog
         open={isPreAlarmDialogOpen}
         onOpenChange={setIsPreAlarmDialogOpen}
+        onPreAlarmStart={handlePreAlarmStart}
+        onPreAlarmEnd={handlePreAlarmEnd}
       />
 
       <SOSAlarm
