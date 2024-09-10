@@ -9,7 +9,6 @@ import CountryCodeDropdown from '@/components/CountryCodeDropdown';
 import { useAuth } from '@/context/AuthContext';
 
 export default function Login() {
-  const [countryCode, setCountryCode] = useState('+1');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [step, setStep] = useState('phone'); // 'phone' or 'verify'
   const router = useRouter();
@@ -18,24 +17,32 @@ export default function Login() {
   const handlePhoneSubmit = async (e) => {
     e.preventDefault();
     if (phoneNumber.trim()) {
-      await sendVerificationCode(countryCode + phoneNumber);
+      await sendVerificationCode('+44' + phoneNumber);
       setStep('verify');
     }
   };
 
   const handleVerificationSubmit = async (code) => {
-    await login(countryCode + phoneNumber, code);
+    await login('+44' + phoneNumber, code);
     if (!error) {
       router.push('/');
     }
   };
 
   const handleResendCode = () => {
-    sendVerificationCode(countryCode + phoneNumber);
+    sendVerificationCode('+44' + phoneNumber);
+  };
+
+  const handlePhoneNumberChange = (e) => {
+    let value = e.target.value.replace(/[^0-9]/g, '');
+    if (value.startsWith('0')) {
+      value = value.substring(1);
+    }
+    setPhoneNumber(value);
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-900 text-white">
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-700 text-white">
       <h1 className="text-3xl font-bold mb-8">Gemini Locator</h1>
       {error && (
         <Alert variant="destructive" className="mb-4">
@@ -44,33 +51,35 @@ export default function Login() {
       )}
       {step === 'phone' && (
         <form onSubmit={handlePhoneSubmit} className="w-full max-w-xs">
-          <h2 className="text-xl mb-4">Enter your phone number</h2>
-          <div className="mb-4">
-            <Label htmlFor="phoneNumber">Phone Number</Label>
-            <div className="flex mt-1">
-              <CountryCodeDropdown
-                value={countryCode}
-                onChange={setCountryCode}
-              />
+          <h2 className="text-xl mb-8">Enter your phone number</h2>
+          <div className="mb-8">
+            <Label htmlFor="phoneNumber" className="block mb-2">Phone Number</Label>
+            <div className="flex mt-6">
+              <div className="bg-gray-600 text-white px-3 py-0 rounded-l-md flex items-center">
+                +44
+              </div>
               <Input
                 id="phoneNumber"
                 type="tel"
                 placeholder="Enter your phone number"
                 value={phoneNumber}
-                onChange={(e) => setPhoneNumber(e.target.value)}
-                className="flex-1 ml-2"
+                onChange={handlePhoneNumberChange}
+                className="flex-1 rounded-l-none bg-gray-800 text-white placeholder-gray-500 border-none focus:ring-0"
                 required
               />
             </div>
           </div>
-          <Button type="submit" className="w-full" disabled={loading}>Send Code</Button>
+          <Button type="submit" className="w-full shadow-lg bg-green-500 hover:bg-green-600" disabled={loading}>Send Code</Button>
         </form>
       )}
       {step === 'verify' && (
         <div className="w-full max-w-xs">
           <h2 className="text-xl mb-4">Enter Verification Code</h2>
-          <SixDigitInput onComplete={handleVerificationSubmit} />
-          <Button onClick={handleResendCode} variant="outline" className="w-full mt-4" disabled={loading}>
+          <SixDigitInput 
+            onComplete={handleVerificationSubmit} 
+            inputClassName="bg-gray-800 text-white placeholder-gray-500 border-none focus:ring-0"
+          />
+          <Button onClick={handleResendCode} variant="outline" className="w-full mt-4 shadow-lg bg-green-500 hover:bg-green-600 text-white" disabled={loading}>
             Send Again
           </Button>
         </div>

@@ -5,8 +5,10 @@ import { AuthProvider } from '@/context/AuthContext';
 export default function App({ Component, pageProps }) {
   return (
     <AuthProvider>
-      <Component {...pageProps} />
-      <Toaster />
+      <div className="bg-gray-700 min-h-screen">
+        <Component {...pageProps} />
+        <Toaster />
+      </div>
     </AuthProvider>
   );
 }
