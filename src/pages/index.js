@@ -119,7 +119,7 @@ export default function Home() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-gray-900 text-white p-4">
+    <div className="flex flex-col min-h-screen bg-black text-white p-4">
       <Toaster richColors />
       <header className="flex justify-between items-center mb-8">
         <h1 className="text-2xl font-bold">Gemini Locator</h1>
@@ -142,44 +142,44 @@ export default function Home() {
           <Button
             onClick={toggleLocationMonitoring}
             variant={isLocationMonitoring ? "destructive" : "default"}
-            className={`${isLocationMonitoring ? 'bg-gray-500' : 'bg-green-500'} h-32 text-lg flex flex-col items-center justify-center`}
+            className={`${isLocationMonitoring ? 'bg-red-500' : 'bg-green-500'} h-32 text-lg flex flex-col items-center justify-center rounded-lg font-bold text-white`}
           >
             {renderButtonContent(
-              isLocationMonitoring ? <Pause className="w-16 h-16 mb-2" /> : <Play className="w-16 h-16 mb-2" />,
-              isLocationMonitoring ? 'Stop Monitoring' : 'Shift Monitoring'
+              isLocationMonitoring ? <Pause className="w-20 h-20 mb-2" /> : <Play className="w-20 h-20 mb-2" />,
+              isLocationMonitoring ? 'Stop Monitoring' : 'Start Monitoring'
             )}
           </Button>
 
           <Button 
             onClick={handleStartPreAlarm} 
             variant="default" 
-            className="bg-blue-500 h-32 text-lg flex flex-col items-center justify-center"
+            className="bg-blue-500 h-32 text-lg flex flex-col items-center justify-center rounded-lg font-bold text-white"
           >
-            {renderButtonContent(<Bell className="w-16 h-16 mb-2" />, 'Start Pre-Alarm')}
+            {renderButtonContent(<Bell className="w-20 h-20 mb-2" />, 'Start Pre-Alarm')}
           </Button>
 
           <Button 
             onClick={handleExtendPreAlarm} 
             variant="default" 
-            className="bg-yellow-500 h-32 text-lg flex flex-col items-center justify-center"
+            className="bg-yellow-500 h-32 text-lg flex flex-col items-center justify-center rounded-lg font-bold text-white"
           >
-            {renderButtonContent(<BellRing className="w-16 h-16 mb-2" />, 'Extend Pre-Alarm')}
-          </Button>
-
-          <Button 
-            onClick={handleSOSAlarm} 
-            variant="destructive" 
-            className="bg-red-500 h-32 text-lg flex flex-col items-center justify-center"
-          >
-            {renderButtonContent(<AlertTriangle className="w-16 h-16 mb-2" />, 'SOS Alarm')}
+            {renderButtonContent(<BellRing className="w-20 h-20 mb-2" />, 'Extend Pre-Alarm')}
           </Button>
 
           <Button 
             onClick={handleSendLocation} 
             variant="outline" 
-            className="bg-gray-700 h-32 text-lg flex flex-col items-center justify-center col-span-2"
+            className="bg-gray-800 h-32 text-lg flex flex-col items-center justify-center rounded-lg font-bold text-white"
           >
-            {renderButtonContent(<Send className="w-16 h-16 mb-2" />, 'Send Location')}
+            {renderButtonContent(<Send className="w-20 h-20 mb-2" />, 'Send Location')}
+          </Button>
+
+          <Button 
+            onClick={handleSOSAlarm} 
+            variant="destructive" 
+            className="bg-red-500 h-32 text-lg flex flex-col items-center justify-center col-span-2 rounded-lg font-bold text-white"
+          >
+            {renderButtonContent(<AlertTriangle className="w-20 h-20 mb-2" />, 'SOS Alarm')}
           </Button>
         </div>
 
@@ -197,7 +197,7 @@ export default function Home() {
         <Button onClick={handleLogout} variant="ghost">Logout</Button>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="bg-gray-700">
+            <Button variant="outline" className="bg-gray-800">
               <MoreHorizontal className="mr-2 h-4 w-4" /> More
             </Button>
           </DropdownMenuTrigger>
