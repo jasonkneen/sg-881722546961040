@@ -4,7 +4,7 @@ import { useAuth } from '@/context/AuthContext';
 import PreAlarmDialog from '@/components/PreAlarmDialog';
 import SOSAlarm from '@/components/SOSAlarm';
 import { toast, Toaster } from "sonner";
-import { MoreHorizontal, Send, MapPin, Play, Pause, Bell, BellRing, AlertTriangle, Wifi } from "lucide-react";
+import { MoreHorizontal, Send, MapPin, Play, Pause, Bell, BellRing, AlertTriangle, Wifi, Menu } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -122,7 +122,7 @@ export default function Home() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-black text-white p-4">
+    <div className="flex flex-col min-h-screen bg-gray-700 text-white p-4">
       <Toaster richColors />
       <header className="flex justify-between items-center mb-8">
         <div className="flex items-center">
@@ -130,14 +130,29 @@ export default function Home() {
           <h1 className="text-2xl font-bold">Gemini Locator</h1>
         </div>
         <div className="flex items-center">
-          {isLocationMonitoring ? (
-            <BellRing className="mr-1 text-green-500 animate-ring" />
-          ) : (
-            <MapPin className="mr-1 text-gray-500" />
-          )}
-          <span className={`font-bold ${isLocationMonitoring ? 'text-green-500' : 'text-gray-500'}`}>
-            {isLocationMonitoring ? 'On' : 'Off'}
-          </span>
+          <div className="flex items-center mr-4">
+            {isLocationMonitoring ? (
+              <BellRing className="mr-1 text-green-500 animate-ring" />
+            ) : (
+              <MapPin className="mr-1 text-gray-500" />
+            )}
+            <span className={`font-bold ${isLocationMonitoring ? 'text-green-500' : 'text-gray-500'}`}>
+              {isLocationMonitoring ? 'On' : 'Off'}
+            </span>
+          </div>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon">
+                <Menu className="h-6 w-6" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuItem>Settings</DropdownMenuItem>
+              <DropdownMenuItem>Help</DropdownMenuItem>
+              <DropdownMenuItem>About</DropdownMenuItem>
+              <DropdownMenuItem onClick={handleLogout}>Logout</DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </header>
 
@@ -146,7 +161,7 @@ export default function Home() {
           <Button
             onClick={toggleLocationMonitoring}
             variant={isLocationMonitoring ? "destructive" : "default"}
-            className={`${isLocationMonitoring ? 'bg-green-500 hover:bg-green-600' : 'bg-[#757575] hover:bg-[#656565]'} h-32 flex flex-col items-center justify-center rounded-lg font-bold text-white transition-colors duration-200`}
+            className={`${isLocationMonitoring ? 'bg-green-500 hover:bg-green-600' : 'bg-[#757575] hover:bg-[#656565]'} h-32 flex flex-col items-center justify-center rounded-lg font-bold text-white transition-colors duration-200 shadow-lg`}
           >
             {renderButtonContent(
               isLocationMonitoring ? <Pause className="w-16 h-16 mb-2" /> : <Play className="w-16 h-16 mb-2" />,
@@ -157,7 +172,7 @@ export default function Home() {
           <Button 
             onClick={handleStartPreAlarm} 
             variant="default" 
-            className={`${isPreAlarmActive ? 'bg-green-500 hover:bg-green-600' : 'bg-[#757575] hover:bg-[#656565]'} h-32 flex flex-col items-center justify-center rounded-lg font-bold text-white transition-colors duration-200`}
+            className={`${isPreAlarmActive ? 'bg-green-500 hover:bg-green-600' : 'bg-[#757575] hover:bg-[#656565]'} h-32 flex flex-col items-center justify-center rounded-lg font-bold text-white transition-colors duration-200 shadow-lg`}
           >
             {renderButtonContent(<Bell className="w-16 h-16 mb-2" />, <span className="text-[0.98em]">Start Pre-Alarm</span>)}
           </Button>
@@ -165,7 +180,7 @@ export default function Home() {
           <Button 
             onClick={handleExtendPreAlarm} 
             variant="default" 
-            className="bg-yellow-500 hover:bg-yellow-600 h-32 flex flex-col items-center justify-center rounded-lg font-bold text-white transition-colors duration-200"
+            className="bg-yellow-500 hover:bg-yellow-600 h-32 flex flex-col items-center justify-center rounded-lg font-bold text-white transition-colors duration-200 shadow-lg"
           >
             {renderButtonContent(<BellRing className="w-16 h-16 mb-2" />, <span className="text-[0.98em]">Extend Pre-Alarm</span>)}
           </Button>
@@ -173,7 +188,7 @@ export default function Home() {
           <Button 
             onClick={handleSendLocation} 
             variant="outline" 
-            className="bg-gray-800 hover:bg-gray-700 h-32 flex flex-col items-center justify-center rounded-lg font-bold text-white transition-colors duration-200"
+            className="bg-gray-800 hover:bg-gray-700 h-32 flex flex-col items-center justify-center rounded-lg font-bold text-white transition-colors duration-200 shadow-lg"
           >
             {renderButtonContent(<Send className="w-16 h-16 mb-2" />, <span className="text-[0.98em]">Send Location</span>)}
           </Button>
@@ -181,7 +196,7 @@ export default function Home() {
           <Button 
             onClick={handleSOSAlarm} 
             variant="destructive" 
-            className="bg-red-500 hover:bg-red-600 h-32 flex flex-col items-center justify-center col-span-2 rounded-lg font-bold text-white transition-colors duration-200"
+            className="bg-red-500 hover:bg-red-600 h-32 flex flex-col items-center justify-center col-span-2 rounded-lg font-bold text-white transition-colors duration-200 shadow-lg"
           >
             {renderButtonContent(<AlertTriangle className="w-16 h-16 mb-2" />, <span className="text-[0.98em]">SOS Alarm</span>)}
           </Button>
@@ -197,20 +212,8 @@ export default function Home() {
         )}
       </main>
 
-      <footer className="mt-8 flex justify-between items-center">
-        <Button onClick={handleLogout} variant="ghost">Logout</Button>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="bg-gray-800">
-              <MoreHorizontal className="mr-2 h-4 w-4" /> More
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent>
-            <DropdownMenuItem>Settings</DropdownMenuItem>
-            <DropdownMenuItem>Help</DropdownMenuItem>
-            <DropdownMenuItem>About</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+      <footer className="mt-8 flex justify-end items-center">
+        {/* Remove the existing DropdownMenu from here */}
       </footer>
 
       <PreAlarmDialog
