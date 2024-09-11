@@ -14,7 +14,7 @@ const timeOptions = [
   { label: '2 HRS', value: 120 },
 ];
 
-export default function PreAlarmDialog({ open, onOpenChange }) {
+export default function PreAlarmDialog({ open, onOpenChange, onPreAlarmStart, onPreAlarmEnd }) {
   const [selectedTime, setSelectedTime] = useState(null);
   const [customTime, setCustomTime] = useState('');
   const [details, setDetails] = useState('');
@@ -28,7 +28,7 @@ export default function PreAlarmDialog({ open, onOpenChange }) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px] bg-gray-800 text-white">
+      <DialogContent className="bg-gray-700 w-[calc(100%-30px)] mx-auto rounded-lg">
         <DialogHeader>
           <DialogTitle>Select expected end time</DialogTitle>
         </DialogHeader>
@@ -38,7 +38,7 @@ export default function PreAlarmDialog({ open, onOpenChange }) {
               <Button
                 key={option.value}
                 onClick={() => setSelectedTime(option.value)}
-                variant={selectedTime === option.value ? "secondary" : "outline"}
+                variant={selectedTime === option. value ? "default" : "secondary"}
               >
                 {option.label}
               </Button>
@@ -51,7 +51,7 @@ export default function PreAlarmDialog({ open, onOpenChange }) {
               type="number"
               value={customTime}
               onChange={(e) => setCustomTime(e.target.value)}
-              className="col-span-2"
+              className="col-span-2 border-white/30"
             />
           </div>
           <div className="space-y-2">
@@ -61,7 +61,7 @@ export default function PreAlarmDialog({ open, onOpenChange }) {
               placeholder="Enter any additional information here..."
               value={details}
               onChange={(e) => setDetails(e.target.value)}
-              className="h-24"
+              className="h-24 border-white/30"
             />
           </div>
         </div>

@@ -94,3 +94,8 @@
   border-color: #3B82F6;
   box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5);
 }
+
+/* Add this to your globals.css file */
+.DialogOverlay {
+  background-color: rgba(0, 0, 0, 0.5) !important; /* 50% opacity black, adjust as needed */
+}
