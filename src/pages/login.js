@@ -7,6 +7,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import SixDigitInput from '@/components/SixDigitInput';
 import CountryCodeDropdown from '@/components/CountryCodeDropdown';
 import { useAuth } from '@/context/AuthContext';
+import { MoreHorizontal, Send, MapPin, Play, Pause, Bell, BellRing, AlertTriangle, Wifi, Menu } from "lucide-react";
 
 export default function Login() {
   const [phoneNumber, setPhoneNumber] = useState('');
@@ -43,7 +44,10 @@ export default function Login() {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-700 text-white">
-      <h1 className="text-3xl font-bold mb-8">Gemini Locator</h1>
+      <div className="flex items-center mb-14">
+        <Wifi className="w-14 h-14 text-white mr-4" />
+        <h1 className="text-4xl font-bold">Gemini Locator</h1>
+      </div>
       {error && (
         <Alert variant="destructive" className="mb-4">
           <AlertDescription>{error}</AlertDescription>
@@ -69,7 +73,9 @@ export default function Login() {
               />
             </div>
           </div>
-          <Button type="submit" className="w-full shadow-lg bg-green-500 hover:bg-green-600" disabled={loading}>Send Code</Button>
+          <div className="flex justify-center">
+            <Button type="submit" className="w-full max-w-xs shadow-lg bg-green-500 hover:bg-green-600" disabled={loading}>Confirm Mobile</Button>
+          </div>
         </form>
       )}
       {step === 'verify' && (
@@ -80,7 +86,7 @@ export default function Login() {
             inputClassName="bg-gray-800 text-white placeholder-gray-500 border-none focus:ring-0"
           />
           <Button onClick={handleResendCode} variant="outline" className="w-full mt-4 shadow-lg bg-green-500 hover:bg-green-600 text-white" disabled={loading}>
-            Send Again
+           Confirm Code
           </Button>
         </div>
       )}
