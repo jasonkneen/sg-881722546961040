@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,15 +14,10 @@ const timeOptions = [
   { label: '2 HRS', value: 120 },
 ];
 
-export default function PreAlarmDialog({ open, onOpenChange, onPreAlarmStart, onPreAlarmEnd }) {
+export default function PreAlarmDialog({ open, onOpenChange, onPreAlarmStart, showToast }) {
   const [selectedTime, setSelectedTime] = useState(null);
   const [customTime, setCustomTime] = useState('');
   const [details, setDetails] = useState('');
-  const [isMonitoring, setIsMonitoring] = useState(false);
-  const [timeMonitored, setTimeMonitored] = useState(0);
-  const [buttonColor, setButtonColor] = useState('default');
-  const [showExtraButtons, setShowExtraButtons] = useState(false); // {{ edit_1 }}
-  const [buttonIcon, setButtonIcon] = useState(''); // {{ edit_2 }}
 
   const handleStartPreAlarm = () => {
     const duration = selectedTime || parseInt(customTime, 10);
@@ -31,32 +26,10 @@ export default function PreAlarmDialog({ open, onOpenChange, onPreAlarmStart, on
       showToast("Please select a valid time.", "error", "Invalid duration selected.");
       return;
     }
-    // TODO: Implement pre-alarm start logic with duration and details
-    console.log("Starting pre-alarm for", duration, "minutes with details:", details);
-    onPreAlarmStart(duration); // Pass duration to parent
+    // Start pre-alarm with duration and details
+    onPreAlarmStart(duration, details);
     onOpenChange(false);
   };
-
-  const startMonitoring = () => {
-    setIsMonitoring(true);
-    setButtonColor('orange');
-    // Ensure buttons are shown when monitoring starts
-    setShowExtraButtons(true); // {{ edit_1 }}
-    // Start timer logic
-    // ... timer logic ...
-  };
-
-  useEffect(() => {
-    let timer;
-    if (isMonitoring) {
-      timer = setInterval(() => {
-        setTimeMonitored(prev => prev + 1); // Increment time
-        // Update icon based on monitoring state
-        setButtonIcon('monitoring'); // {{ edit_2 }}
-      }, 1000);
-    }
-    return () => clearInterval(timer);
-  }, [isMonitoring]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -70,7 +43,7 @@ export default function PreAlarmDialog({ open, onOpenChange, onPreAlarmStart, on
               <Button
                 key={option.value}
                 onClick={() => setSelectedTime(option.value)}
-                variant={selectedTime === option. value ? "default" : "secondary"}
+                variant={selectedTime === option.value ? "default" : "secondary"}
               >
                 {option.label}
               </Button>

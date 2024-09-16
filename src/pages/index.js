@@ -1,21 +1,18 @@
-// Remove or comment out this line
-// import { exec } from 'child_process';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Button } from "@/components/ui/button";
 import { useAuth } from '@/context/AuthContext';
 import PreAlarmDialog from '@/components/PreAlarmDialog';
 import SOSAlarm from '@/components/SOSAlarm';
 import { toast, Toaster } from "sonner";
-import { MoreHorizontal, Send, MapPin, Play, Pause, Bell, BellRing, AlertTriangle, Wifi, Menu } from "lucide-react";
+import { MoreHorizontal, Send, MapPin, Play, Pause, Bell, BellRing, AlertTriangle, Wifi, Menu, Loader } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-
 import { useRouter } from 'next/router';
-
+import GeminiMessenger from '@/components/GeminiMessenger';
 
 export default function Home() {
   const { user, logout } = useAuth(); 
@@ -27,19 +24,27 @@ export default function Home() {
   const [location, setLocation] = useState(null);
   const [isPreAlarmActive, setIsPreAlarmActive] = useState(false);
   const [preAlarmTimeRemaining, setPreAlarmTimeRemaining] = useState(null);
-  const [messenger, setMessenger] = useState(null); // State for the messenger instance
+  const messengerRef = useRef(null);
 
+  useEffect(() => {
+    if (user && !user.phoneNumber) {
+      toast.error("Please add a phone number to your account to use this app.");
+      router.push('/login');
+    }
+  }, [user, router]);
 
-  const handlePreAlarmStart = (duration) => {
-    console.log("handlePreAlarmStart called with duration:", duration);
+  const handlePreAlarmStart = (duration, details) => {
+    console.log("handlePreAlarmStart called with duration:", duration, "and details:", details);
     setIsPreAlarmDialogOpen(false);
     setIsPreAlarmActive(true);
     setPreAlarmTimeRemaining(duration * 60); // Set time remaining in seconds
 
-    // Send pre-alarm message via WebSocket
-    if (messenger) {
-      const phoneNumber = user.phoneNumber; // Assuming user has a phoneNumber property\      
-     
+    // Send pre-alarm message via GeminiMessenger
+    if (messengerRef.current && user && user.phoneNumber) {
+      messengerRef.current.sendLocatorPreAlarm(user.phoneNumber, `PreAlarm started for ${duration} minutes. Details: ${details}`);
+    } else {
+      console.error("Unable to send pre-alarm message: user or phone number not available");
+      showToast("Unable to send pre-alarm message", "error", "Please ensure you're logged in and have a valid phone number.");
     }
   };  
 
@@ -65,13 +70,39 @@ export default function Home() {
   };
 
   const toggleLocationMonitoring = () => {
-    setIsLocationMonitoring(!isLocationMonitoring);
-    setStatus(isLocationMonitoring ? 'Idle' : 'Monitoring');
+    const newMonitoringState = !isLocationMonitoring;
+    setIsLocationMonitoring(newMonitoringState);
+    setStatus(newMonitoringState ? 'Monitoring' : 'Idle');
     showToast(
-      isLocationMonitoring ? "Monitoring Stopped" : "Monitoring Started",
+      newMonitoringState ? "Monitoring Started" : "Monitoring Stopped",
       "success",
-      isLocationMonitoring ? "Location monitoring has been stopped." : "Your location is now being monitored."
+      newMonitoringState ? "Your location is now being monitored." : "Location monitoring has been stopped."
     );
+
+    // Send appropriate message via GeminiMessenger
+    if (messengerRef.current && user && user.phoneNumber) {
+      const phoneNumber = user.phoneNumber;
+      if (newMonitoringState) {
+        messengerRef.current.sendLocatorAppStart(phoneNumber);
+        // Send initial location if available
+        if (location) {
+          messengerRef.current.sendLocatorSingleReport(
+            phoneNumber, 
+            location.latitude, 
+            location.longitude, 
+            0, // altitude (not available in this context)
+            0, // speed (not available in this context)
+            0, // accuracy (not available in this context)
+            0  // bearing (not available in this context)
+          );
+        }
+      } else {
+        messengerRef.current.sendLocatorAppExit(phoneNumber);
+      }
+    } else {
+      console.error("Unable to toggle location monitoring: user or phone number not available");
+      showToast("Unable to toggle location monitoring", "error", "Please ensure you're logged in and have a valid phone number.");
+    }
   };
 
   const handleStartPreAlarm = () => {
@@ -80,6 +111,12 @@ export default function Home() {
       setIsPreAlarmActive(false);
       setPreAlarmTimeRemaining(null);
       console.log("Pre-alarm stopped");
+      if (messengerRef.current && user && user.phoneNumber) {
+        messengerRef.current.sendLocatorPreAlarmCancel(user.phoneNumber);
+      } else {
+        console.error("Unable to cancel pre-alarm: user or phone number not available");
+        showToast("Unable to cancel pre-alarm", "error", "Please ensure you're logged in and have a valid phone number.");
+      }
     } else {
       setIsPreAlarmDialogOpen(true);
       console.log("Opening pre-alarm dialog");
@@ -87,24 +124,45 @@ export default function Home() {
   };
 
   const handlePreAlarmEnd = () => {
-          setIsPreAlarmActive(false);
-    // Any other logic for ending the pre-alarm
+    setIsPreAlarmActive(false);
+    if (messengerRef.current && user && user.phoneNumber) {
+      messengerRef.current.sendLocatorManDownPreAlarmExpired(user.phoneNumber);
+    } else {
+      console.error("Unable to send pre-alarm expiration: user or phone number not available");
+      showToast("Unable to send pre-alarm expiration", "error", "Please ensure you're logged in and have a valid phone number.");
+    }
   };
 
   const handleExtendPreAlarm = () => {
     // TODO: Implement extend pre-alarm logic
     showToast("Pre-Alarm Extended", "info", "The pre-alarm duration has been extended.");
+    if (messengerRef.current && user && user.phoneNumber) {
+      messengerRef.current.sendLocatorPreAlarmExtended(user.phoneNumber);
+    } else {
+      console.error("Unable to extend pre-alarm: user or phone number not available");
+      showToast("Unable to extend pre-alarm", "error", "Please ensure you're logged in and have a valid phone number.");
+    }
   };
 
   const handleSOSAlarm = () => {
     setIsSOSAlarmActive(true);
-    // TODO: Implement server-side SOS alert
     showToast("SOS Alarm Activated", "error", "Emergency services have been notified.");
+    if (messengerRef.current && user && user.phoneNumber && location) {
+      messengerRef.current.sendLocatorAlarmSOS(user.phoneNumber, location.latitude, location.longitude);
+    } else {
+      console.error("Unable to send SOS alarm: user, phone number, or location not available");
+      showToast("Unable to send SOS alarm", "error", "Please ensure you're logged in, have a valid phone number, and location is available.");
+    }
   };
 
   const handleSendLocation = () => {
-    // TODO: Implement send location logic
-    showToast("Location Sent", "success", "Your current location has been sent.");
+    if (messengerRef.current && user && user.phoneNumber && location) {
+      messengerRef.current.sendLocatorSingleReport(user.phoneNumber, location.latitude, location.longitude, 0, 0, 0, 0);
+      showToast("Location Sent", "success", "Your current location has been sent.");
+    } else {
+      console.error("Unable to send location: user, phone number, or location not available");
+      showToast("Unable to Send Location", "error", "Please ensure you're logged in, have a valid phone number, and location is available.");
+    }
   };
 
   const renderButtonContent = (icon, text) => (
@@ -133,13 +191,62 @@ export default function Home() {
     } else if (preAlarmTimeRemaining === 0) {
       setIsPreAlarmActive(false);
       showToast("Pre-Alarm Ended", "info", "The pre-alarm has ended.");
+      handlePreAlarmEnd();
     }
     return () => clearInterval(timer);
   }, [isPreAlarmActive, preAlarmTimeRemaining]);
 
-  return (
+  useEffect(() => {
+    // Set up geolocation watching
+    const watchId = navigator.geolocation.watchPosition(
+      (position) => {
+        setLocation({
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude,
+        });
+        if (messengerRef.current && user && user.phoneNumber) {
+          messengerRef.current.setLocation(position.coords.latitude, position.coords.longitude);
+        }
+      },
+      (error) => {
+        console.error("Error getting location:", error);
+        showToast("Unable to get location", "error", "Please check your device settings.");
+      },
+      { enableHighAccuracy: true, timeout: 20000, maximumAge: 1000 }
+    );
+
+    return () => {
+      navigator.geolocation.clearWatch(watchId);
+    };
+  }, [user]);
+
+  useEffect(() => {
+    if (!user || !user.phoneNumber) {
+      const timer = setTimeout(() => {
+        router.push('/login');
+      }, 1500);
+      return () => clearTimeout(timer);
+    }
+  }, [user, router]);
+  const [showLoader, setShowLoader] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowLoader(false);
+    }, 1500);
+    return () => clearTimeout(timer);
+  }, []);
+
+  return showLoader ? (
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-700 text-white">
+      <Loader className="w-16 h-16 animate-spin mb-4" />
+      <p className="text-xl">Checking user information...</p>
+    </div>
+  ) : (
     <div className="flex flex-col min-h-screen bg-gray-700 text-white p-4">
       <Toaster richColors />
+      <GeminiMessenger ref={messengerRef} />
+      {/* Rest of the component remains the same */}
       <header className="flex justify-between items-center mb-8">
         <div className="flex items-center">
           <Wifi className="w-8 h-8 text-white mr-2" />
@@ -204,8 +311,16 @@ export default function Home() {
             {renderButtonContent(<AlertTriangle className="w-16 h-16 mb-2" />, <span className="text-[0.98em]">SOS Alarm</span>)}
           </Button>
 
+          <Button
+            onClick={handleSendLocation}
+            variant="default"
+            className="bg-[#757575] hover:bg-[#656565] h-32 flex flex-col items-center justify-center col-span-2 rounded-lg font-bold text-white transition-colors duration-200 shadow-lg"
+          >
+            {renderButtonContent(<Send className="w-16 h-16 mb-2" />, <span className="text-[0.98em]">Send Location</span>)}
+          </Button>
+
           {isPreAlarmActive && preAlarmTimeRemaining !== null && (
-            <div className="mt-4 p-4 bg-gray-800 rounded-lg text-center">
+            <div className="mt-4 p-4 bg-gray-800 rounded-lg text-center col-span-2">
               <h2 className="text-lg font-semibold mb-2">Pre-Alarm Monitoring</h2>
               <p className="text-3xl font-bold mb-4">
                 {Math.floor(preAlarmTimeRemaining / 60)}:
@@ -232,15 +347,11 @@ export default function Home() {
         )}
       </main>
 
-      <footer className="mt-8 flex justify-end items-center">
-        {/* Remove the existing DropdownMenu from here */}
-      </footer>
-
       <PreAlarmDialog
         open={isPreAlarmDialogOpen}
         onOpenChange={setIsPreAlarmDialogOpen}
         onPreAlarmStart={handlePreAlarmStart}
-        onPreAlarmEnd={handlePreAlarmEnd}
+        showToast={showToast}
       />
 
       <SOSAlarm
