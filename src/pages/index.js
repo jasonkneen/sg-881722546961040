@@ -1,3 +1,5 @@
+// Remove or comment out this line
+// import { exec } from 'child_process';
 import { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { useAuth } from '@/context/AuthContext';
@@ -14,8 +16,9 @@ import {
 
 import { useRouter } from 'next/router';
 
+
 export default function Home() {
-  const { user, logout } = useAuth();
+  const { user, logout } = useAuth(); 
   const router = useRouter();
   const [status, setStatus] = useState('Idle');
   const [isLocationMonitoring, setIsLocationMonitoring] = useState(false);
@@ -23,25 +26,22 @@ export default function Home() {
   const [isSOSAlarmActive, setIsSOSAlarmActive] = useState(false);
   const [location, setLocation] = useState(null);
   const [isPreAlarmActive, setIsPreAlarmActive] = useState(false);
+  const [preAlarmTimeRemaining, setPreAlarmTimeRemaining] = useState(null);
+  const [messenger, setMessenger] = useState(null); // State for the messenger instance
 
-  useEffect(() => {
-    if (isLocationMonitoring) {
-      const watchId = navigator.geolocation.watchPosition(
-        position => {
-          setLocation({
-            latitude: position.coords.latitude,
-            longitude: position.coords.longitude
-          });
-          // TODO: Send location to server
-        },
-        error => {
-          console.error("Error getting location:", error);
-          showToast("Unable to get your location. Please check your settings.", "error");
-        }
-      );
-      return () => navigator.geolocation.clearWatch(watchId);
+
+  const handlePreAlarmStart = (duration) => {
+    console.log("handlePreAlarmStart called with duration:", duration);
+    setIsPreAlarmDialogOpen(false);
+    setIsPreAlarmActive(true);
+    setPreAlarmTimeRemaining(duration * 60); // Set time remaining in seconds
+
+    // Send pre-alarm message via WebSocket
+    if (messenger) {
+      const phoneNumber = user.phoneNumber; // Assuming user has a phoneNumber property\      
+     
     }
-  }, [isLocationMonitoring]);
+  };  
 
   const showToast = (message, type = "default", description = "") => {
     const toastOptions = {
@@ -75,16 +75,19 @@ export default function Home() {
   };
 
   const handleStartPreAlarm = () => {
-    setIsPreAlarmDialogOpen(true);
-  };
-
-  const handlePreAlarmStart = () => {
-    setIsPreAlarmActive(true);
-    // Any other logic for starting the pre-alarm
+    if (isPreAlarmActive) {
+      // Stop pre-alarm
+      setIsPreAlarmActive(false);
+      setPreAlarmTimeRemaining(null);
+      console.log("Pre-alarm stopped");
+    } else {
+      setIsPreAlarmDialogOpen(true);
+      console.log("Opening pre-alarm dialog");
+    }
   };
 
   const handlePreAlarmEnd = () => {
-    setIsPreAlarmActive(false);
+          setIsPreAlarmActive(false);
     // Any other logic for ending the pre-alarm
   };
 
@@ -120,6 +123,19 @@ export default function Home() {
       showToast("Logout failed. Please try again.", "error");
     }
   };
+
+  useEffect(() => {
+    let timer;
+    if (isPreAlarmActive && preAlarmTimeRemaining > 0) {
+      timer = setInterval(() => {
+        setPreAlarmTimeRemaining(prev => prev - 1);
+      }, 1000);
+    } else if (preAlarmTimeRemaining === 0) {
+      setIsPreAlarmActive(false);
+      showToast("Pre-Alarm Ended", "info", "The pre-alarm has ended.");
+    }
+    return () => clearInterval(timer);
+  }, [isPreAlarmActive, preAlarmTimeRemaining]);
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-700 text-white p-4">
@@ -172,9 +188,12 @@ export default function Home() {
           <Button 
             onClick={handleStartPreAlarm} 
             variant="default" 
-            className={`${isPreAlarmActive ? 'bg-green-500 hover:bg-green-600' : 'bg-[#757575] hover:bg-[#656565]'} h-32 flex flex-col items-center justify-center rounded-lg font-bold text-white transition-colors duration-200 shadow-lg`}
+            className={`${isPreAlarmActive ? 'bg-orange-500 hover:bg-orange-600' : 'bg-[#757575] hover:bg-[#656565]'} h-32 flex flex-col items-center justify-center rounded-lg font-bold text-white transition-colors duration-200 shadow-lg`}
           >
-            {renderButtonContent(<Bell className="w-16 h-16 mb-2" />, <span className="text-[0.98em]">Start Pre-Alarm</span>)}
+            {renderButtonContent(
+              <Bell className="w-16 h-16 mb-2" />,
+              <span className="text-[0.98em]">{isPreAlarmActive ? 'Stop Pre-Alarm' : 'Start Pre-Alarm'}</span>
+            )}
           </Button>
 
           <Button 
@@ -185,13 +204,22 @@ export default function Home() {
             {renderButtonContent(<AlertTriangle className="w-16 h-16 mb-2" />, <span className="text-[0.98em]">SOS Alarm</span>)}
           </Button>
 
-          <Button 
-            onClick={handleExtendPreAlarm} 
-            variant="default" 
-            className="bg-yellow-500 hover:bg-yellow-600 h-32 flex flex-col items-center justify-center col-span-2 rounded-lg font-bold text-white transition-colors duration-200 shadow-lg"
-          >
-            {renderButtonContent(<BellRing className="w-16 h-16 mb-2" />, <span className="text-[0.98em]">Extend Pre-Alarm</span>)}
-          </Button>
+          {isPreAlarmActive && preAlarmTimeRemaining !== null && (
+            <div className="mt-4 p-4 bg-gray-800 rounded-lg text-center">
+              <h2 className="text-lg font-semibold mb-2">Pre-Alarm Monitoring</h2>
+              <p className="text-3xl font-bold mb-4">
+                {Math.floor(preAlarmTimeRemaining / 60)}:
+                {(preAlarmTimeRemaining % 60).toString().padStart(2, '0')}
+              </p>
+              <Button 
+                onClick={handleExtendPreAlarm} 
+                variant="default" 
+                className="bg-[#757575] hover:bg-[#656565] px-4 py-2 rounded-lg font-bold text-white transition-colors duration-200 shadow-lg"
+              >
+                Extend Pre-Alarm Monitoring
+              </Button>
+            </div>
+          )}
         </div>
 
         {location && (

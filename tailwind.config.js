@@ -51,6 +51,13 @@ module.exports = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        orange: {
+          500: '#ff9f43',
+        },
+        gray: {
+          600: '#757575',
+          500: '#656565', // Ensure hover state color exists
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
