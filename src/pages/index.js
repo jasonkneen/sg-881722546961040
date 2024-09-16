@@ -145,13 +145,43 @@ export default function Home() {
   };
 
   const handleSOSAlarm = () => {
+    if (!messengerRef.current) {
+      console.error("Unable to send SOS alarm: GeminiMessenger not initialized");
+      showToast("Unable to send SOS alarm", "error", "An internal error occurred. Please try again.");
+      return;
+    }
+
+    if (!user) {
+      console.error("Unable to send SOS alarm: user not available");
+      showToast("Unable to send SOS alarm", "error", "Please ensure you're logged in.");
+      return;
+    }
+
+    if (!user.phoneNumber) {
+      console.error("Unable to send SOS alarm: phone number not available");
+      showToast("Unable to send SOS alarm", "error", "Please add a phone number to your account.");
+      return;
+    }
+
+    if (!location) {
+      console.error("Unable to send SOS alarm: location not available");
+      showToast("Unable to send SOS alarm", "error", "Unable to get your location. Please ensure location services are enabled.");
+      return;
+    }
+
     setIsSOSAlarmActive(true);
     showToast("SOS Alarm Activated", "error", "Emergency services have been notified.");
+    messengerRef.current.sendLocatorAlarmSOS(user.phoneNumber, location.latitude, location.longitude);
+  };
+
+  const handleSOSAlarmDeactivate = () => {
+    setIsSOSAlarmActive(false);
+    showToast("SOS Alarm Deactivated", "info", "Emergency services have been notified of the deactivation.");
     if (messengerRef.current && user && user.phoneNumber && location) {
-      messengerRef.current.sendLocatorAlarmSOS(user.phoneNumber, location.latitude, location.longitude);
+      messengerRef.current.sendLocatorAlarmCancel(user.phoneNumber, location.latitude, location.longitude);
     } else {
-      console.error("Unable to send SOS alarm: user, phone number, or location not available");
-      showToast("Unable to send SOS alarm", "error", "Please ensure you're logged in, have a valid phone number, and location is available.");
+      console.error("Unable to send SOS alarm deactivation: user, phone number, or location not available");
+      showToast("Unable to send SOS alarm deactivation", "error", "Please ensure you're logged in, have a valid phone number, and location is available.");
     }
   };
 
@@ -311,13 +341,13 @@ export default function Home() {
             {renderButtonContent(<AlertTriangle className="w-16 h-16 mb-2" />, <span className="text-[0.98em]">SOS Alarm</span>)}
           </Button>
 
-          <Button
+{/*           <Button
             onClick={handleSendLocation}
             variant="default"
             className="bg-[#757575] hover:bg-[#656565] h-32 flex flex-col items-center justify-center col-span-2 rounded-lg font-bold text-white transition-colors duration-200 shadow-lg"
           >
             {renderButtonContent(<Send className="w-16 h-16 mb-2" />, <span className="text-[0.98em]">Send Location</span>)}
-          </Button>
+          </Button> */}
 
           {isPreAlarmActive && preAlarmTimeRemaining !== null && (
             <div className="mt-4 p-4 bg-gray-800 rounded-lg text-center col-span-2">
@@ -356,7 +386,7 @@ export default function Home() {
 
       <SOSAlarm
         isActive={isSOSAlarmActive}
-        onDeactivate={() => setIsSOSAlarmActive(false)}
+        onDeactivate={handleSOSAlarmDeactivate}
       />
     </div>
   );
