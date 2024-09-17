@@ -49,6 +49,8 @@ export default function Home() {
     // Send pre-alarm message via GeminiMessenger
     if (messengerRef.current && user && user.phoneNumber) {
       messengerRef.current.sendLocatorPreAlarm(user.phoneNumber, `PreAlarm started for ${duration} minutes. Details: ${details}`);
+      // Add toast notification for pre-alarm start
+      showToast("Pre-Alarm Started", "info", `Pre-alarm activated for ${duration} minutes. Details: ${details}`);
     } else {
       console.error("Unable to send pre-alarm message: user or phone number not available");
       showToast("Unable to send pre-alarm message", "error", "Please ensure you're logged in and have a valid phone number.");
@@ -120,6 +122,8 @@ export default function Home() {
       console.log("Pre-alarm stopped");
       if (messengerRef.current && user && user.phoneNumber) {
         messengerRef.current.sendLocatorPreAlarmCancel(user.phoneNumber);
+        // Add toast notification for pre-alarm stop
+        showToast("Pre-Alarm Stopped", "info", "The pre-alarm has been cancelled.");
       } else {
         console.error("Unable to cancel pre-alarm: user or phone number not available");
         showToast("Unable to cancel pre-alarm", "error", "Please ensure you're logged in and have a valid phone number.");
@@ -134,6 +138,8 @@ export default function Home() {
     setIsPreAlarmActive(false);
     if (messengerRef.current && user && user.phoneNumber) {
       messengerRef.current.sendLocatorManDownPreAlarmExpired(user.phoneNumber);
+      // Add toast notification for pre-alarm expiration
+      showToast("Pre-Alarm Expired", "info", "The pre-alarm duration has ended.");
     } else {
       console.error("Unable to send pre-alarm expiration: user or phone number not available");
       showToast("Unable to send pre-alarm expiration", "error", "Please ensure you're logged in and have a valid phone number.");
