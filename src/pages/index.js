@@ -23,6 +23,7 @@ export default function Home() {
   const [status, setStatus] = useState('Idle');
   const [isLocationMonitoring, setIsLocationMonitoring] = useState(false);
   const [isPreAlarmDialogOpen, setIsPreAlarmDialogOpen] = useState(false);
+  const [isPreAlarmExtension, setIsPreAlarmExtension] = useState(false);
   const [isSOSAlarmActive, setIsSOSAlarmActive] = useState(false);
   const [location, setLocation] = useState(null);
   const [isPreAlarmActive, setIsPreAlarmActive] = useState(false);
@@ -48,13 +49,18 @@ export default function Home() {
 
     // Send pre-alarm message via GeminiMessenger
     if (messengerRef.current && user && user.phoneNumber) {
-      messengerRef.current.sendLocatorPreAlarm(user.phoneNumber, `PreAlarm started for ${duration} minutes. Details: ${details}`);
-      // Add toast notification for pre-alarm start
-      showToast("Pre-Alarm Started", "info", `Pre-alarm activated for ${duration} minutes. Details: ${details}`);
+      if (isPreAlarmExtension) {
+        messengerRef.current.sendLocatorPreAlarmExtended(user.phoneNumber, `PreAlarm extended for ${duration} minutes. Details: ${details}`);
+        showToast("Pre-Alarm Extended", "info", `Pre-alarm extended for ${duration} minutes. Details: ${details}`);
+      } else {
+        messengerRef.current.sendLocatorPreAlarm(user.phoneNumber, `PreAlarm started for ${duration} minutes. Details: ${details}`);
+        showToast("Pre-Alarm Started", "info", `Pre-alarm activated for ${duration} minutes. Details: ${details}`);
+      }
     } else {
       console.error("Unable to send pre-alarm message: user or phone number not available");
       showToast("Unable to send pre-alarm message", "error", "Please ensure you're logged in and have a valid phone number.");
     }
+    setIsPreAlarmExtension(false);
   };  
 
   const showToast = (message, type = "default", description = "") => {
@@ -122,7 +128,6 @@ export default function Home() {
       console.log("Pre-alarm stopped");
       if (messengerRef.current && user && user.phoneNumber) {
         messengerRef.current.sendLocatorPreAlarmCancel(user.phoneNumber);
-        // Add toast notification for pre-alarm stop
         showToast("Pre-Alarm Stopped", "info", "The pre-alarm has been cancelled.");
       } else {
         console.error("Unable to cancel pre-alarm: user or phone number not available");
@@ -130,6 +135,7 @@ export default function Home() {
       }
     } else {
       setIsPreAlarmDialogOpen(true);
+      setIsPreAlarmExtension(false);
       console.log("Opening pre-alarm dialog");
     }
   };
@@ -138,7 +144,6 @@ export default function Home() {
     setIsPreAlarmActive(false);
     if (messengerRef.current && user && user.phoneNumber) {
       messengerRef.current.sendLocatorManDownPreAlarmExpired(user.phoneNumber);
-      // Add toast notification for pre-alarm expiration
       showToast("Pre-Alarm Expired", "info", "The pre-alarm duration has ended.");
     } else {
       console.error("Unable to send pre-alarm expiration: user or phone number not available");
@@ -147,14 +152,9 @@ export default function Home() {
   };
 
   const handleExtendPreAlarm = () => {
-    // TODO: Implement extend pre-alarm logic
-    showToast("Pre-Alarm Extended", "info", "The pre-alarm duration has been extended.");
-    if (messengerRef.current && user && user.phoneNumber) {
-      messengerRef.current.sendLocatorPreAlarmExtended(user.phoneNumber);
-    } else {
-      console.error("Unable to extend pre-alarm: user or phone number not available");
-      showToast("Unable to extend pre-alarm", "error", "Please ensure you're logged in and have a valid phone number.");
-    }
+    setIsPreAlarmDialogOpen(true);
+    setIsPreAlarmExtension(true);
+    console.log("Opening pre-alarm extension dialog");
   };
 
   const handleSOSAlarm = () => {
@@ -346,6 +346,7 @@ export default function Home() {
         onOpenChange={setIsPreAlarmDialogOpen}
         onPreAlarmStart={handlePreAlarmStart}
         showToast={showToast}
+        isExtension={isPreAlarmExtension}
       />
 
       <SOSAlarm

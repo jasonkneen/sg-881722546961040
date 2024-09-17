@@ -14,7 +14,7 @@ const timeOptions = [
   { label: '2 HRS', value: 120 },
 ];
 
-export default function PreAlarmDialog({ open, onOpenChange, onPreAlarmStart, showToast }) {
+export default function PreAlarmDialog({ open, onOpenChange, onPreAlarmStart, showToast, isExtension }) {
   const [selectedTime, setSelectedTime] = useState(null);
   const [customTime, setCustomTime] = useState('');
   const [details, setDetails] = useState('');
@@ -26,7 +26,7 @@ export default function PreAlarmDialog({ open, onOpenChange, onPreAlarmStart, sh
       showToast("Please select a valid time.", "error", "Invalid duration selected.");
       return;
     }
-    // Start pre-alarm with duration and details
+    // Start or extend pre-alarm with duration and details
     onPreAlarmStart(duration, details);
     onOpenChange(false);
   };
@@ -35,7 +35,7 @@ export default function PreAlarmDialog({ open, onOpenChange, onPreAlarmStart, sh
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="bg-gray-700 w-[calc(100%-30px)] mx-auto rounded-lg">
         <DialogHeader>
-          <DialogTitle>Select expected end time</DialogTitle>
+          <DialogTitle>{isExtension ? "Extend Pre-Alarm" : "Select expected end time"}</DialogTitle>
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <div className="grid grid-cols-3 gap-2">
@@ -72,7 +72,7 @@ export default function PreAlarmDialog({ open, onOpenChange, onPreAlarmStart, sh
         </div>
         <DialogFooter>
           <Button onClick={handleStartPreAlarm} className="w-full">
-            Start Pre-Alarm
+            {isExtension ? "Extend Pre-Alarm" : "Start Pre-Alarm"}
           </Button>
         </DialogFooter>
       </DialogContent>
