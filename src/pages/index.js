@@ -17,6 +17,14 @@ import SettingsModal from '@/components/SettingsModal';
 import AboutModal from '@/components/AboutModal';
 import HelpModal from '@/components/HelpModal';
 
+// TODO  send spp start HERE at startup
+
+// Location ON and OFF
+// ONE LOCATION TASK
+// PREALASRM ON , CAN'T TOUCH LOCATION REGARDLESS OF APP STATE
+
+
+
 export default function Home() {
   const { user, logout } = useAuth(); 
   const router = useRouter();
@@ -84,7 +92,7 @@ export default function Home() {
     }
   };
 
-  const toggleLocationMonitoring = () => {
+  const toggleLocationMonitoring = async () => {
     const newMonitoringState = !isLocationMonitoring;
     setIsLocationMonitoring(newMonitoringState);
     setStatus(newMonitoringState ? 'Monitoring' : 'Idle');
@@ -98,9 +106,14 @@ export default function Home() {
     if (messengerRef.current && user && user.phoneNumber) {
       const phoneNumber = user.phoneNumber;
       if (newMonitoringState) {
-        messengerRef.current.sendLocatorAppStart(phoneNumber);
+        // TODO move this outside messengerRef.current.sendLocatorAppStart(phoneNumber);
         // Send initial location if available
         if (location) {
+          messengerRef.current.sendLocatorShiftBegin(phoneNumber);        
+          
+          // wait 10 seconds
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          
           messengerRef.current.sendLocatorSingleReport(
             phoneNumber, 
             location.latitude, 
@@ -112,7 +125,8 @@ export default function Home() {
           );
         }
       } else {
-        messengerRef.current.sendLocatorAppExit(phoneNumber);
+        // TODO move this messengerRef.current.sendLocatorAppExit(phoneNumber);
+        messengerRef.current.sendLocatorShiftFinished(phoneNumber);
       }
     } else {
       console.error("Unable to toggle location monitoring: user or phone number not available");

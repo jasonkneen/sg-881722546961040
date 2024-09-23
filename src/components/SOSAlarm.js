@@ -1,18 +1,28 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { AlertTriangle } from "lucide-react";
+import GeminiMessenger from '@/components/GeminiMessenger';
 
-export default function SOSAlarm({ isActive, onDeactivate }) {
+export default function SOSAlarm({ isActive, onDeactivate, user, location }) {
   const [isDeactivating, setIsDeactivating] = useState(false);
+  const messengerRef = useRef(null);
 
-  const handleDeactivate = () => {
+  const handleDeactivate = async () => {
     setIsDeactivating(true);
-    // TODO: Implement server-side SOS deactivation
-    setTimeout(() => {
+    try {
+      if (user && user.phoneNumber && location && messengerRef.current) {
+        await messengerRef.current.sendLocatorAlarmCancel(user.phoneNumber, location.latitude, location.longitude);
+        console.log('SOS alarm deactivated successfully');
+      } else {
+        console.error("Unable to deactivate SOS alarm: user, phone number, location, or messenger not available");
+      }
+    } catch (error) {
+      console.error("Error deactivating SOS alarm:", error);
+    } finally {
       onDeactivate();
       setIsDeactivating(false);
-    }, 2000); // Simulating server response time
+    }
   };
 
   return (
@@ -36,6 +46,7 @@ export default function SOSAlarm({ isActive, onDeactivate }) {
           </Button>
         </DialogFooter>
       </DialogContent>
+      <GeminiMessenger ref={messengerRef} />
     </Dialog>
   );
 }

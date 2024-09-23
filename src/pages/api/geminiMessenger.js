@@ -13,65 +13,94 @@ const maxReconnectAttempts = 5;
 let reconnectAttempts = 0;
 let reconnectDelay = initialReconnectDelay;
 let pingInterval;
+let handshakeTimeout;
+let locationMonitoringActive = false;
+let locationMonitoringInterval;
+
+// TODO -- get current location from phone
+
 
 function connect() {
   if (isConnecting) {
-    console.log('Already attempting to connect, skipping redundant connection attempt');
+    console.log('[GeminiMessenger] Already attempting to connect, skipping redundant connection attempt');
     return;
   }
 
-  console.log('Connecting to server');
-  console.log('Server URL:', serverUrl);
-  console.log('Port:', port);
+  console.log('[GeminiMessenger] Attempting to connect to server');
+  console.log('[GeminiMessenger] Server URL:', serverUrl);
+  console.log('[GeminiMessenger] Port:', port);
   
   if (socket) {
     socket.destroy();
+    socket.removeAllListeners();
   }
 
   isConnecting = true;
   socket = new net.Socket();
 
+  socket.on('connect', () => {
+    console.log('[GeminiMessenger] Successfully connected to server');
+    isConnected = true;
+    isConnecting = false;
+    reconnectAttempts = 0;
+    reconnectDelay = initialReconnectDelay;
+    
+    // Implement a delay before sending the handshake
+    clearTimeout(handshakeTimeout);
+    handshakeTimeout = setTimeout(() => {
+      sendHandshake();
+    }, 1000);
+  });
+
   socket.on('data', (data) => {
-    console.log('Received:', data.toString());
+    console.log('[GeminiMessenger] Received data from server:', data.toString());
+    if (data.toString().trim() === 'HANDSHAKE_OK') {
+      console.log('[GeminiMessenger] Handshake successful');
+      startPing();
+    }
   });
 
   socket.on("close", (hadError) => {
+    console.log(`[GeminiMessenger] Disconnected from server. Had error: ${hadError}`);
     isConnected = false;
     isConnecting = false;
-    console.log(`Disconnected from server. Had error: ${hadError}`);
     clearInterval(pingInterval);
+    clearTimeout(handshakeTimeout);
     
     if (reconnectAttempts < maxReconnectAttempts) {
       reconnectAttempts++;
-      console.log(`Reconnection attempt ${reconnectAttempts} of ${maxReconnectAttempts}`);
-      setTimeout(connect, reconnectDelay);
-      // Implement exponential backoff
-      reconnectDelay = Math.min(reconnectDelay * 2, maxReconnectDelay);
+      const delay = Math.min(reconnectDelay * Math.pow(2, reconnectAttempts - 1), maxReconnectDelay);
+      console.log(`[GeminiMessenger] Scheduling reconnection attempt ${reconnectAttempts} of ${maxReconnectAttempts} in ${delay}ms`);
+      setTimeout(connect, delay);
     } else {
-      console.error('Max reconnection attempts reached. Please check the server.');
+      console.error('[GeminiMessenger] Max reconnection attempts reached. Please check the server connection manually.');
     }
   });
 
   socket.on('error', (error) => {
-    console.error('Socket Error:', error.message);
-    isConnected = false;
-    isConnecting = false;
+    console.error('[GeminiMessenger] Socket Error:', error.message);
   });
 
   socket.setTimeout(60000, () => {
     if (!isConnected) {
-      console.log('Connection timed out');
+      console.log('[GeminiMessenger] Connection attempt timed out');
       socket.destroy();
     }
   });
 
   socket.connect(port, serverUrl, () => {
-    isConnected = true;
-    isConnecting = false;
-    reconnectAttempts = 0;
-    reconnectDelay = initialReconnectDelay;
-    console.log('Connected to server');
-    //startPing();
+    console.log('[GeminiMessenger] Connection established');
+  });
+}
+
+function sendHandshake() {
+  console.log('[GeminiMessenger] Sending handshake');
+  socket.write('HANDSHAKE\x04', (err) => {
+    if (err) {
+      console.error('[GeminiMessenger] Error sending handshake:', err.message);
+    } else {
+      console.log('[GeminiMessenger] Handshake sent successfully');
+    }
   });
 }
 
@@ -79,10 +108,16 @@ function startPing() {
   clearInterval(pingInterval);
   pingInterval = setInterval(() => {
     if (isConnected) {
-      console.log('Sending PING');
-      socket.write('PING\x04');
+      console.log('[GeminiMessenger] Sending PING');
+      socket.write('PING\x04', (err) => {
+        if (err) {
+          console.error('[GeminiMessenger] Error sending PING:', err.message);
+        } else {
+          console.log('[GeminiMessenger] PING sent successfully');
+        }
+      });
     } else {
-      console.log('Not connected, skipping PING');
+      console.log('[GeminiMessenger] Not connected, skipping PING');
     }
   }, 30000); // Send a ping every 30 seconds
 }
@@ -114,10 +149,19 @@ async function sendMessage(eventCode, phoneNumber, latitude = 0, longitude = 0, 
   try {
     await ensureConnection();
     const message = formatMessage(eventCode, phoneNumber, latitude, longitude, altitude, speed, accuracy, bearing, timestamp, preAlarmEnd, suffix);
-    socket.write(message + '\x04');
-    console.log('Sent:', message);
+    return new Promise((resolve, reject) => {
+      socket.write(message + '\x04', (err) => {
+        if (err) {
+          console.error('[GeminiMessenger] Error sending message:', err.message);
+          reject(err);
+        } else {
+          console.log('[GeminiMessenger] Sent:', message);
+          resolve();
+        }
+      });
+    });
   } catch (error) {
-    console.error('Failed to send message:', error.message);
+    console.error('[GeminiMessenger] Failed to send message:', error.message);
     throw error; // Rethrow the error to be handled by the caller
   }
 }
@@ -144,8 +188,29 @@ function getCurrentTimestamp() {
   return now.toISOString().replace(/[-:T]/g, '').split('.')[0];
 }
 
-// Connect when the server starts
-connect();
+function startLocationMonitoring(phoneNumber) {
+  if (!locationMonitoringActive) {
+    locationMonitoringActive = true;
+    clearInterval(locationMonitoringInterval);
+    locationMonitoringInterval = setTimeout(() => {
+      // get current location
+      
+      if (isConnected) {
+
+        sendMessage('LTI', phoneNumber, currentLocation.latitude, currentLocation.longitude, 0, 0, 0, 0, getCurrentTimestamp());
+      }
+    }, 30000); // Send location every 30 seconds
+    console.log('[GeminiMessenger] Location monitoring started');
+  }
+}
+
+function stopLocationMonitoring() {
+  if (locationMonitoringActive) {
+    locationMonitoringActive = false;
+    clearInterval(locationMonitoringInterval);
+    console.log('[GeminiMessenger] Location monitoring stopped');
+  }
+}
 
 export default async function handler(req, res) {
   if (req.method === 'POST') {
@@ -206,6 +271,15 @@ export default async function handler(req, res) {
           break;
         case 'setLocation':
           currentLocation = { latitude, longitude };
+          if (!locationMonitoringActive) {
+            startLocationMonitoring(phoneNumber);
+          }
+          break;
+        case 'startLocationMonitoring':
+          startLocationMonitoring(phoneNumber);
+          break;
+        case 'stopLocationMonitoring':
+          stopLocationMonitoring();
           break;
         default:
           res.status(400).json({ error: 'Invalid action' });
@@ -214,10 +288,13 @@ export default async function handler(req, res) {
 
       res.status(200).json({ success: true });
     } catch (error) {
-      console.error('Error in handler:', error);
+      console.error('[GeminiMessenger] Error in handler:', error);
       res.status(500).json({ error: 'Failed to process request', details: error.message });
     }
   } else {
     res.status(405).json({ error: 'Method not allowed' });
   }
 }
+
+// Connect when the module is imported
+//connect();
