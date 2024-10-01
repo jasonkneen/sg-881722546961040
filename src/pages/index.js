@@ -13,17 +13,9 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useRouter } from 'next/router';
 import GeminiMessenger from '@/components/GeminiMessenger';
-import SettingsModal from '@/components/SettingsModal';
 import AboutModal from '@/components/AboutModal';
 import HelpModal from '@/components/HelpModal';
-
-// TODO  send spp start HERE at startup
-
-// Location ON and OFF
-// ONE LOCATION TASK
-// PREALASRM ON , CAN'T TOUCH LOCATION REGARDLESS OF APP STATE
-
-
+import Link from 'next/link';
 
 export default function Home() {
   const { user, logout } = useAuth(); 
@@ -38,7 +30,6 @@ export default function Home() {
   const [preAlarmTimeRemaining, setPreAlarmTimeRemaining] = useState(null);
   const messengerRef = useRef(null);
   const [showLoader, setShowLoader] = useState(true);
-  const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
   const [isAboutModalOpen, setIsAboutModalOpen] = useState(false);
   const [isHelpModalOpen, setIsHelpModalOpen] = useState(false);
 
@@ -263,6 +254,111 @@ export default function Home() {
     return () => clearTimeout(timer);
   }, []);
 
+  const authenticate = async () => {
+    const OIDCUrl = 'https://auth.gemini-sense.com/realms/bold-api/protocol/openid-connect';
+    const ClientId = 'locator-app'; // Replace with your actual client ID
+   // const redirectUri = 'boldlocator://enroll'; // Replace with your actual redirect URI
+  const redirectUri = 'boldlocator://enroll'; // Replace with your actual redirect URI
+    // Step 1: Generate PKCE challenge (code verifier and code challenge)
+    const generateCodeVerifier = () => {
+      const array = new Uint32Array(56 / 2); // Length of code verifier
+      window.crypto.getRandomValues(array);
+      return Array.from(array, dec => ('0' + dec.toString(16)).substr(-2)).join('');
+    };
+  
+    const generateCodeChallenge = async (codeVerifier) => {
+      const encoder = new TextEncoder();
+      const data = encoder.encode(codeVerifier);
+      const digest = await window.crypto.subtle.digest('SHA-256', data);
+      return btoa(String.fromCharCode(...new Uint8Array(digest)))
+        .replace(/\+/g, '-')  // Replace + with -
+        .replace(/\//g, '_')  // Replace / with _
+        .replace(/=+$/, '');  // Remove trailing =
+    };
+  
+    const generatePkceChallenge = async () => {
+      const codeVerifier = generateCodeVerifier(); // Generate random code verifier
+      const codeChallenge = await generateCodeChallenge(codeVerifier); // Generate code challenge (SHA256 hash)
+  
+      // Store the code verifier for later use in the token exchange
+      sessionStorage.setItem('code_verifier', codeVerifier);
+  
+      return {
+        verifier: codeVerifier,
+        challenge: codeChallenge,
+        method: 'S256' // The method used to generate the challenge (always S256 for SHA256)
+      };
+    };
+  
+    // Step 2: Generate PKCE challenge and redirect user to Keycloak login
+    const pkceChallenge = await generatePkceChallenge();
+  
+    // Build the authentication URL
+    const authUrl = `${OIDCUrl}/auth?response_type=code&client_id=${encodeURIComponent(ClientId)}&redirect_uri=${encodeURIComponent(redirectUri)}&state=${encodeURIComponent(pkceChallenge.verifier)}&code_challenge=${encodeURIComponent(pkceChallenge.challenge)}&code_challenge_method=${encodeURIComponent(pkceChallenge.method)}`;
+  
+    // Redirect the user to Keycloak for login
+    window.location.href = authUrl;
+  
+    // Step 3: Handle callback and exchange authorization code for token (this happens after redirect)
+    const exchangeCodeForToken = async (authCode) => {
+      const codeVerifier = sessionStorage.getItem('code_verifier');
+      const tokenUrl = `${OIDCUrl}/token`;
+  alert('here')
+      const body = new URLSearchParams({
+        'grant_type': 'authorization_code',
+        'code': authCode,
+        'redirect_uri': redirectUri,
+        'client_id': ClientId,
+        'code_verifier': codeVerifier
+      });
+  
+      try {
+        const response = await fetch(tokenUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+          },
+          body: body.toString()
+        });
+  
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+  
+        const data = await response.json();
+        console.log('Token:', data);
+        return data;
+      } catch (error) {
+        console.error('Error during token exchange:', error);
+      }
+    };
+  
+    // Step 4: After the user logs in and Keycloak redirects back, capture the authorization code and exchange it for a token
+    const handleCallback = () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const authCode = urlParams.get('code');
+  
+      if (authCode) {
+        exchangeCodeForToken(authCode);
+      } else {
+        console.error('Authorization code not found in the URL.');
+      }
+    };
+  
+    // Call handleCallback when the user returns from the login flow
+    handleCallback();
+  };
+  
+  // Call authenticate function to initiate the login flow
+  //  authenticate();
+
+  // Call the authenticate function
+  // authenticate(); // Uncomment this line if you want to call it immediately
+
+  const handleAuthenticate = async () => {
+    await authenticate();
+  };
+
   return showLoader ? (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-700 text-white">
       <Loader className="w-16 h-16 animate-spin mb-4" />
@@ -295,10 +391,32 @@ export default function Home() {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="bg-gray-600">
-              <DropdownMenuItem onClick={() => setIsSettingsModalOpen(true)} className="hover:bg-gray-500">Settings</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setIsHelpModalOpen(true)} className="hover:bg-gray-500">Help</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setIsAboutModalOpen(true)} className="hover:bg-gray-500">About</DropdownMenuItem>
-              <DropdownMenuItem onClick={handleLogout} className="hover:bg-gray-500">Logout</DropdownMenuItem>
+              {/* Navigate to the Settings page */}
+              <DropdownMenuItem
+                onClick={() => router.push('/settings')}
+                className="hover:bg-gray-500"
+              >
+                Settings
+              </DropdownMenuItem>
+              {/* Help and About Modals remain the same */}
+              <DropdownMenuItem
+                onClick={() => setIsHelpModalOpen(true)}
+                className="hover:bg-gray-500"
+              >
+                Help
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => setIsAboutModalOpen(true)}
+                className="hover:bg-gray-500"
+              >
+                About
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={handleLogout}
+                className="hover:bg-gray-500"
+              >
+                Logout
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
@@ -366,11 +484,8 @@ export default function Home() {
       <SOSAlarm
         isActive={isSOSAlarmActive}
         onDeactivate={() => setIsSOSAlarmActive(false)}
-      />
-
-      <SettingsModal
-        isOpen={isSettingsModalOpen}
-        onClose={() => setIsSettingsModalOpen(false)}
+        user={user}
+        location={location}
       />
 
       <AboutModal
@@ -382,6 +497,14 @@ export default function Home() {
         isOpen={isHelpModalOpen}
         onClose={() => setIsHelpModalOpen(false)}
       />
+
+      <Button 
+        onClick={handleAuthenticate} 
+        variant="default" 
+        className="bg-blue-500 hover:bg-blue-600 h-12 flex items-center justify-center rounded-lg font-bold text-white transition-colors duration-200 shadow-lg"
+      >
+        Authenticate
+      </Button>
     </div>
   );
 }
