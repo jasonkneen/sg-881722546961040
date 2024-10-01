@@ -25,10 +25,10 @@ const SettingsModal = ({ isOpen, onClose }) => {
   useEffect(() => {
     const fetchSettings = async () => {
       try {
-        const setupResponse = await fetch('/data/Bold.Setup.API.json');
+        const setupResponse = await fetch('/settings/Bold.Setup.API.json'); // Updated path
         const setupData = await setupResponse.json();
 
-        const userResponse = await fetch('/data/Bold.User.API.json');
+        const userResponse = await fetch('/settings/Bold.User.API.json'); // Updated path
         const userData = await userResponse.json();
 
         setCombinedSettings({ ...setupData, ...userData });
@@ -125,9 +125,8 @@ const SettingsModal = ({ isOpen, onClose }) => {
 
             {/* Save and Cancel Buttons */}
             <div className="mt-6 text-right border-t border-gray-800 pt-4 flex justify-end space-x-4"> {/* Added flex and spacing */}
-               
-              <button className="btn btn-secondary px-4 py-2 border-2 rounded-lg w-full" onClick={onClose}>Cancel</button> {/* Updated button styling */}
-              <button className="btn btn-primary px-4 py-2 border-2 rounded-lg w-full" onClick={onClose}>Save</button> {/* Updated button styling */}
+              <button className="btn btn-secondary w-1/2 border border-gray-800 p-1 rounded-lg" onClick={onClose}>Cancel</button> {/* Set padding and rounded corners */}
+              <button className="btn btn-primary w-1/2 border border-gray-800 p-1 rounded-lg" onClick={onClose}>Save</button> {/* Set padding and rounded corners */}
             </div>
           </CardContent>
         </Card>
