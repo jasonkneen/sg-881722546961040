@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'next-i18next';
 import {
   Dialog,
   DialogContent,
@@ -16,6 +17,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Loader } from "lucide-react";
 
 const SettingsModal = ({ isOpen, onClose }) => {
+  const { t } = useTranslation('common');
   const [visibleSettings, setVisibleSettings] = useState({
     requirePinOnStopAlarm: true,
     version: true,
@@ -35,7 +37,7 @@ const SettingsModal = ({ isOpen, onClose }) => {
         const userResponse = await fetch('/Bold.User.API.json');
 
         if (!setupResponse.ok || !userResponse.ok) {
-          throw new Error('Failed to fetch settings data');
+          throw new Error(t('settings.fetchError'));
         }
 
         const setupData = await setupResponse.json();
@@ -55,7 +57,7 @@ const SettingsModal = ({ isOpen, onClose }) => {
         setCombinedSettings(combinedData);
       } catch (error) {
         console.error('Error fetching settings:', error);
-        setError('Failed to load settings. Please try again later.');
+        setError(t('settings.loadError'));
       } finally {
         setIsLoading(false);
       }
@@ -64,7 +66,7 @@ const SettingsModal = ({ isOpen, onClose }) => {
     if (isOpen) {
       fetchSettings();
     }
-  }, [isOpen]);
+  }, [isOpen, t]);
 
   const toggleSettingVisibility = (settingId) => {
     setVisibleSettings(prev => ({
@@ -100,12 +102,12 @@ const SettingsModal = ({ isOpen, onClose }) => {
             ) : (
               <Accordion type="multiple" className="space-y-4">
                 <AccordionItem value="account-settings">
-                  <AccordionTrigger>Account Settings</AccordionTrigger>
+                  <AccordionTrigger>{t('settings.accountSettings')}</AccordionTrigger>
                   <AccordionContent>
                     {visibleSettings.requirePinOnStopAlarm && (
                       <div className="mb-4">
                         <label htmlFor="requirePinOnStopAlarm" className="block text-sm font-medium text-gray-400">
-                          Require PIN on Stop Alarm
+                          {t('settings.requirePinOnStopAlarm')}
                         </label>
                         <Checkbox
                           id="requirePinOnStopAlarm"
@@ -117,7 +119,7 @@ const SettingsModal = ({ isOpen, onClose }) => {
                     {visibleSettings.phoneNumber && (
                       <div className="mb-4">
                         <label htmlFor="phoneNumber" className="block text-sm font-medium text-gray-400">
-                          Phone Number
+                          {t('settings.phoneNumber')}
                         </label>
                         <Input
                           id="phoneNumber"
@@ -131,12 +133,12 @@ const SettingsModal = ({ isOpen, onClose }) => {
                 </AccordionItem>
 
                 <AccordionItem value="application-info">
-                  <AccordionTrigger>Application Info</AccordionTrigger>
+                  <AccordionTrigger>{t('settings.applicationInfo')}</AccordionTrigger>
                   <AccordionContent>
                     {visibleSettings.version && (
                       <div className="mb-4">
                         <label htmlFor="version" className="block text-sm font-medium text-gray-400">
-                          Version
+                          {t('settings.version')}
                         </label>
                         <Input
                           id="version"
@@ -150,11 +152,11 @@ const SettingsModal = ({ isOpen, onClose }) => {
                 </AccordionItem>
 
                 <AccordionItem value="alarm-settings">
-                  <AccordionTrigger>Alarm Settings</AccordionTrigger>
+                  <AccordionTrigger>{t('settings.alarmSettings')}</AccordionTrigger>
                   <AccordionContent>
                     <div className="mb-4">
                       <label htmlFor="primaryReceiver" className="block text-sm font-medium text-gray-400">
-                        Primary Receiver
+                        {t('settings.primaryReceiver')}
                       </label>
                       <Input
                         id="primaryReceiver"
@@ -165,7 +167,7 @@ const SettingsModal = ({ isOpen, onClose }) => {
                     </div>
                     <div className="mb-4">
                       <label htmlFor="connectionTimeout" className="block text-sm font-medium text-gray-400">
-                        Connection Timeout (ms)
+                        {t('settings.connectionTimeout')}
                       </label>
                       <Input
                         id="connectionTimeout"
@@ -177,7 +179,7 @@ const SettingsModal = ({ isOpen, onClose }) => {
                     </div>
                     <div className="mb-4">
                       <label htmlFor="locationReportPeriod" className="block text-sm font-medium text-gray-400">
-                        Normal Location Report Period (s)
+                        {t('settings.locationReportPeriod')}
                       </label>
                       <Input
                         id="locationReportPeriod"
@@ -193,7 +195,7 @@ const SettingsModal = ({ isOpen, onClose }) => {
             )}
 
             <div className="mt-6">
-              <h3 className="text-xl font-semibold mb-2">Customize Settings Visibility</h3>
+              <h3 className="text-xl font-semibold mb-2">{t('settings.customizeVisibility')}</h3>
               <div className="space-y-2">
                 {Object.keys(visibleSettings).map((settingId) => (
                   <div key={settingId} className="flex items-center">
@@ -203,7 +205,7 @@ const SettingsModal = ({ isOpen, onClose }) => {
                       onCheckedChange={() => toggleSettingVisibility(settingId)}
                     />
                     <label htmlFor={`toggle-${settingId}`} className="ml-2 text-sm text-gray-400 capitalize">
-                      {settingId.replace(/([A-Z])/g, ' $1')}
+                      {t(`settings.${settingId}`)}
                     </label>
                   </div>
                 ))}
@@ -211,8 +213,8 @@ const SettingsModal = ({ isOpen, onClose }) => {
             </div>
 
             <div className="mt-6 text-right border-t border-gray-800 pt-4 flex justify-end space-x-4">
-              <Button variant="secondary" className="w-1/2" onClick={onClose}>Cancel</Button>
-              <Button variant="default" className="w-1/2" onClick={handleSave}>Save</Button>
+              <Button variant="secondary" className="w-1/2" onClick={onClose}>{t('buttons.cancel')}</Button>
+              <Button variant="default" className="w-1/2" onClick={handleSave}>{t('buttons.save')}</Button>
             </div>
           </CardContent>
         </Card>

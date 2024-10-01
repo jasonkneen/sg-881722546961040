@@ -55,7 +55,7 @@ export default function Login() {
       )}
       {step === 'phone' && (
         <form onSubmit={handlePhoneSubmit} className="w-full max-w-xs">
-          <h2 className="text-xl mb-8">Enter your phone number</h2>
+          <h2 className="text-xl mb-8">Sign in to your account</h2>
           <div className="mb-8">
             <Label htmlFor="phoneNumber" className="block mb-2">Phone Number</Label>
             <div className="flex mt-6">
@@ -74,19 +74,19 @@ export default function Login() {
             </div>
           </div>
           <div className="flex justify-center">
-            <Button type="submit" className="w-full max-w-xs shadow-lg bg-green-500 hover:bg-green-600" disabled={loading}>Confirm Mobile</Button>
+            <Button type="submit" className="w-full max-w-xs shadow-lg bg-green-500 hover:bg-green-600" disabled={loading}>Sign In</Button>
           </div>
         </form>
       )}
       {step === 'verify' && (
         <div className="w-full max-w-xs">
-          <h2 className="text-xl mb-4">Enter Verification Code</h2>
+          <h2 className="text-xl mb-4">Verification Code</h2>
           <SixDigitInput 
             onComplete={handleVerificationSubmit} 
             inputClassName="bg-gray-800 text-white placeholder-gray-500 border-none focus:ring-0"
           />
           <Button onClick={handleResendCode} variant="outline" className="w-full mt-4 shadow-lg bg-green-500 hover:bg-green-600 text-white" disabled={loading}>
-           Confirm Code
+           Submit Code
           </Button>
         </div>
       )}
