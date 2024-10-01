@@ -49,9 +49,9 @@ const SettingsModal = ({ isOpen, onClose }) => {
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="overflow-y-auto max-h-[80vh] bg-transparent p-2"> {/* Make background transparent */}
-        <Card className="bg-transparent shadow-none mt-12 rounded-lg border-none"> {/* Set card background to transparent, remove border */}
+    <Dialog open={isOpen} onOpenChange={onClose} onClose={onClose}> {/* Removed close button */}
+      <DialogContent className="overflow-y-auto max-h-[80vh] bg-gray-900 p-4 rounded-lg "> {/* Make background transparent */}
+        <Card className="bg-transparent shadow-none mt-12 border-none"> {/* Set card background to transparent, remove border */}
           <CardContent className="bg-transparent p-0"> {/* Set content background to transparent, remove padding */}
             <Accordion type="multiple" className="space-y-4">
               {/* Example Group: Account Settings */}
@@ -123,9 +123,11 @@ const SettingsModal = ({ isOpen, onClose }) => {
               </div>
             </div>
 
-            {/* Save Settings Button */}
-            <div className="mt-6">
-              <Button variant="primary" onClick={onClose}>Save Settings</Button>
+            {/* Save and Cancel Buttons */}
+            <div className="mt-6 text-right border-t border-gray-800 pt-4 flex justify-end space-x-4"> {/* Added flex and spacing */}
+               
+              <button className="btn btn-secondary px-4 py-2 border-2 rounded-lg w-full" onClick={onClose}>Cancel</button> {/* Updated button styling */}
+              <button className="btn btn-primary px-4 py-2 border-2 rounded-lg w-full" onClick={onClose}>Save</button> {/* Updated button styling */}
             </div>
           </CardContent>
         </Card>

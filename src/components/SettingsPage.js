@@ -46,13 +46,13 @@ const SettingsPage = () => {
   };
 
   return (
-    <div className="p-6 bg-gray-100 min-h-screen">
+    <div className="p-6 min-h-screen">
       <Card className="max-w-4xl mx-auto">
         <CardHeader>
           <h2 className="text-2xl font-bold">Settings</h2>
         </CardHeader>
         <CardContent>
-          <Accordion type="multiple" className="space-y-4">
+          <Accordion type="multiple" className="space-y-2">
             {/* Example Group: Account Settings */}
             <AccordionItem value="account-settings">
               <AccordionTrigger>Account Settings</AccordionTrigger>
