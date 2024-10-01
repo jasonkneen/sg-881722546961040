@@ -15,6 +15,7 @@ import { useRouter } from 'next/router';
 import GeminiMessenger from '@/components/GeminiMessenger';
 import AboutModal from '@/components/AboutModal';
 import HelpModal from '@/components/HelpModal';
+import SettingsModal from '@/components/SettingsModal'; // Import the SettingsModal
 import Link from 'next/link';
 
 export default function Home() {
@@ -23,15 +24,16 @@ export default function Home() {
   const [status, setStatus] = useState('Idle');
   const [isLocationMonitoring, setIsLocationMonitoring] = useState(false);
   const [isPreAlarmDialogOpen, setIsPreAlarmDialogOpen] = useState(false);
-  const [isPreAlarmExtension, setIsPreAlarmExtension] = useState(false);
   const [isSOSAlarmActive, setIsSOSAlarmActive] = useState(false);
   const [location, setLocation] = useState(null);
   const [isPreAlarmActive, setIsPreAlarmActive] = useState(false);
   const [preAlarmTimeRemaining, setPreAlarmTimeRemaining] = useState(null);
+  const [isPreAlarmExtension, setIsPreAlarmExtension] = useState(false); // Add this line
   const messengerRef = useRef(null);
   const [showLoader, setShowLoader] = useState(true);
   const [isAboutModalOpen, setIsAboutModalOpen] = useState(false);
   const [isHelpModalOpen, setIsHelpModalOpen] = useState(false);
+  const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
 
   useEffect(() => {
     if (user && !user.phoneNumber) {
@@ -48,7 +50,7 @@ export default function Home() {
 
     // Send pre-alarm message via GeminiMessenger
     if (messengerRef.current && user && user.phoneNumber) {
-      if (isPreAlarmExtension) {
+      if (isPreAlarmExtension) { // This line will now work
         messengerRef.current.sendLocatorPreAlarmExtended(user.phoneNumber, `PreAlarm extended for ${duration} minutes. Details: ${details}`);
         showToast("Pre-Alarm Extended", "info", `Pre-alarm extended for ${duration} minutes. Details: ${details}`);
       } else {
@@ -359,6 +361,10 @@ export default function Home() {
     await authenticate();
   };
 
+  const handleSettingsClick = () => {
+    setIsSettingsModalOpen(true); // Open the settings modal
+  };
+
   return showLoader ? (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-700 text-white">
       <Loader className="w-16 h-16 animate-spin mb-4" />
@@ -391,14 +397,12 @@ export default function Home() {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="bg-gray-600">
-              {/* Navigate to the Settings page */}
               <DropdownMenuItem
-                onClick={() => router.push('/settings')}
+                onClick={handleSettingsClick} // Open settings modal
                 className="hover:bg-gray-500"
               >
                 Settings
               </DropdownMenuItem>
-              {/* Help and About Modals remain the same */}
               <DropdownMenuItem
                 onClick={() => setIsHelpModalOpen(true)}
                 className="hover:bg-gray-500"
@@ -505,6 +509,12 @@ export default function Home() {
       >
         Authenticate
       </Button>
+
+      {/* Render the SettingsModal here */}
+      <SettingsModal 
+        isOpen={isSettingsModalOpen} 
+        onClose={() => setIsSettingsModalOpen(false)} 
+      />
     </div>
   );
 }

@@ -2,8 +2,6 @@ import React, { useState, useEffect } from 'react';
 import {
   Dialog,
   DialogContent,
-  DialogHeader,
-  DialogTitle,
 } from "@/components/ui/dialog";
 import {
   Accordion,
@@ -52,12 +50,9 @@ const SettingsModal = ({ isOpen, onClose }) => {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="overflow-y-auto max-h-[80vh] bg-gray-100">
-        <DialogHeader>
-          <DialogTitle className="text-2xl font-bold">Settings</DialogTitle>
-        </DialogHeader>
-        <Card>
-          <CardContent>
+      <DialogContent className="overflow-y-auto max-h-[80vh] bg-transparent p-2"> {/* Make background transparent */}
+        <Card className="bg-transparent shadow-none mt-12 rounded-lg border-none"> {/* Set card background to transparent, remove border */}
+          <CardContent className="bg-transparent p-0"> {/* Set content background to transparent, remove padding */}
             <Accordion type="multiple" className="space-y-4">
               {/* Example Group: Account Settings */}
               <AccordionItem value="account-settings">
@@ -65,7 +60,7 @@ const SettingsModal = ({ isOpen, onClose }) => {
                 <AccordionContent>
                   {visibleSettings.requirePinOnStopAlarm && combinedSettings.requirePinOnStopAlarm !== undefined && (
                     <div className="mb-4">
-                      <label htmlFor="requirePinOnStopAlarm" className="block text-sm font-medium text-gray-700">
+                      <label htmlFor="requirePinOnStopAlarm" className="block text-sm font-medium text-gray-400"> {/* Lighter text color */}
                         Require PIN on Stop Alarm
                       </label>
                       <Checkbox
@@ -91,14 +86,14 @@ const SettingsModal = ({ isOpen, onClose }) => {
                 <AccordionContent>
                   {visibleSettings.version && (
                     <div className="mb-4">
-                      <label htmlFor="version" className="block text-sm font-medium text-gray-700">
+                      <label htmlFor="version" className="block text-sm font-medium text-gray-400"> {/* Lighter text color */}
                         Version
                       </label>
                       <Input
                         id="version"
-                        value={combinedSettings.version || ''}
+                        value={combinedSettings.version || '0.5.0'}
                         readOnly
-                        className="bg-gray-200"
+                        className="gray-200"
                       />
                     </div>
                   )}
@@ -120,7 +115,7 @@ const SettingsModal = ({ isOpen, onClose }) => {
                       checked={visibleSettings[settingId]}
                       onCheckedChange={() => toggleSettingVisibility(settingId)}
                     />
-                    <label htmlFor={`toggle-${settingId}`} className="ml-2 text-sm text-gray-700 capitalize">
+                    <label htmlFor={`toggle-${settingId}`} className="ml-2 text-sm text-gray-400 capitalize"> {/* Lighter text color */}
                       {settingId.replace(/([A-Z])/g, ' $1')}
                     </label>
                   </div>
