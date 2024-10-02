@@ -1,9 +1,10 @@
-import { config as i18nConfig } from './next-i18next.config.js';
-
 /** @type {import('next').NextConfig} */
-const nextConfig = {
-  reactStrictMode: true,
-  i18n: i18nConfig.i18n,
+const nextConfig = async () => {
+  const i18nConfig = await import('./next-i18next.config.js');
+  return {
+    reactStrictMode: true,
+    i18n: i18nConfig.default.i18n,
+  };
 };
 
 export default nextConfig;

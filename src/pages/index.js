@@ -45,7 +45,43 @@ function Home() {
     }
   }, [user, router, t]);
 
-  // ... (rest of the component logic remains the same)
+  const toggleLocationMonitoring = () => {
+    setIsLocationMonitoring(!isLocationMonitoring);
+  };
+
+  const handleStartPreAlarm = () => {
+    setIsPreAlarmDialogOpen(true);
+  };
+
+  const handleSOSAlarm = () => {
+    setIsSOSAlarmActive(!isSOSAlarmActive);
+  };
+
+  const handlePreAlarmStart = () => {
+    setIsPreAlarmActive(true);
+    setPreAlarmTimeRemaining(300); // 5 minutes
+  };
+
+  const handleExtendPreAlarm = () => {
+    setPreAlarmTimeRemaining(prev => prev + 300);
+  };
+
+  const handleSettingsClick = () => {
+    setIsSettingsModalOpen(true);
+  };
+
+  const handleLogout = () => {
+    logout();
+    router.push('/login');
+  };
+
+  const handleAuthenticate = () => {
+    // Implement authentication logic here
+  };
+
+  const showToast = (message, type = 'default') => {
+    toast[type](message);
+  };
 
   const renderButtonContent = (icon, text) => (
     <>
