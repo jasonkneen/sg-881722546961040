@@ -91,6 +91,9 @@ function Home() {
   );
 
   // ... (rest of the component logic remains the same)
+  setTimeout(() => {
+    setShowLoader(false);
+  }, 1000);
 
   return showLoader ? (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-700 text-white">
