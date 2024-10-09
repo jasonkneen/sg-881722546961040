@@ -170,7 +170,14 @@ function Home() {
           </Button>
 
           <Button 
-            onClick={handleStartPreAlarm} 
+            onClick={() => {
+              if (isPreAlarmActive) {
+                setIsPreAlarmActive(false);
+                setPreAlarmTimeRemaining(null);
+              } else {
+                handleStartPreAlarm();
+              }
+            }} 
             variant="default" 
             className={`${isPreAlarmActive ? 'bg-orange-500 hover:bg-orange-600' : 'bg-[#757575] hover:bg-[#656565]'} h-32 flex flex-col items-center justify-center rounded-lg font-bold text-white transition-colors duration-200 shadow-lg`}
           >
