@@ -1,7 +1,11 @@
-import React, { forwardRef, useImperativeHandle } from 'react';
+import React, { forwardRef, useImperativeHandle, useState, useEffect } from 'react';
+import { toast } from 'sonner';
 
 const GeminiMessenger = forwardRef((props, ref) => {
+  const [isConnected, setIsConnected] = useState(false);
+
   const sendRequest = async (action, data) => {
+    console.log(`[GeminiMessenger] Sending request: ${action}`, data);
     try {
       const response = await fetch('/api/geminiMessenger', {
         method: 'POST',
@@ -11,13 +15,48 @@ const GeminiMessenger = forwardRef((props, ref) => {
         body: JSON.stringify({ action, ...data }),
       });
       if (!response.ok) {
-        throw new Error('Network response was not ok');
+        throw new Error(`Network response was not ok: ${response.status} ${response.statusText}`);
       }
-      return await response.json();
+      const result = await response.json();
+      console.log(`[GeminiMessenger] Response for ${action}:`, result);
+      return result;
     } catch (error) {
-      console.error('Error:', error);
+      console.error(`[GeminiMessenger] Error in ${action}:`, error);
+      toast.error(`Failed to send ${action}: ${error.message}`);
+      throw error;
     }
   };
+
+  const checkConnectionStatus = async () => {
+    try {
+      const response = await sendRequest('healthCheck');
+      setIsConnected(response.connected);
+    } catch (error) {
+      setIsConnected(false);
+    }
+  };
+
+  const reconnect = async () => {
+    try {
+      await sendRequest('reconnect');
+      await checkConnectionStatus();
+      if (isConnected) {
+        console.log('[GeminiMessenger] Reconnection successful');
+        return true;
+      } else {
+        throw new Error('Failed to reconnect');
+      }
+    } catch (error) {
+      console.error('[GeminiMessenger] Reconnection failed:', error);
+      throw error;
+    }
+  };
+
+  useEffect(() => {
+    checkConnectionStatus();
+    const intervalId = setInterval(checkConnectionStatus, 60000); // Check every minute
+    return () => clearInterval(intervalId);
+  }, []);
 
   useImperativeHandle(ref, () => ({
     sendLocatorAppExit: (phoneNumber) => sendRequest('sendLocatorAppExit', { phoneNumber }),
@@ -44,6 +83,8 @@ const GeminiMessenger = forwardRef((props, ref) => {
     sendLocatorDuressAlert: (phoneNumber, latitude, longitude) => 
       sendRequest('sendLocatorDuressAlert', { phoneNumber, latitude, longitude }),
     setLocation: (latitude, longitude) => sendRequest('setLocation', { latitude, longitude }),
+    isConnected: () => isConnected,
+    reconnect: reconnect,
   }));
 
   return null;

@@ -4,7 +4,7 @@ import { useAuth } from '@/context/AuthContext';
 import PreAlarmDialog from '@/components/PreAlarmDialog';
 import SOSAlarm from '@/components/SOSAlarm';
 import { toast, Toaster } from "sonner";
-import { MoreHorizontal, Send, MapPin, Play, Pause, Bell, BellRing, AlertTriangle, Wifi, Menu, Loader } from "lucide-react";
+import { MoreHorizontal, Send, MapPin, Play, Pause, Bell, BellRing, AlertTriangle, Wifi, WifiOff, Menu, Loader, RefreshCw } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -37,13 +37,69 @@ function Home() {
   const [isAboutModalOpen, setIsAboutModalOpen] = useState(false);
   const [isHelpModalOpen, setIsHelpModalOpen] = useState(false);
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
+  const [isServerConnected, setIsServerConnected] = useState(false);
+  const [isReconnecting, setIsReconnecting] = useState(false);
 
   useEffect(() => {
     if (user && !user.phoneNumber) {
       toast.error(t('errors.noPhoneNumber'));
       router.push('/login');
+    } else if (user && user.phoneNumber) {
+      // Send app start message when the component mounts
+      messengerRef.current.sendLocatorAppStart(user.phoneNumber)
+        .catch(error => {
+          console.error('Failed to send app start message:', error);
+          toast.error(t('errors.failedToSendAppStart'));
+        });
     }
+
+    // Send app exit message when the component unmounts
+    return () => {
+      if (user && user.phoneNumber) {
+        messengerRef.current.sendLocatorAppExit(user.phoneNumber)
+          .catch(error => {
+            console.error('Failed to send app exit message:', error);
+          });
+      }
+    };
   }, [user, router, t]);
+
+  useEffect(() => {
+    // Start or stop location monitoring based on isLocationMonitoring state
+    if (user && user.phoneNumber) {
+      if (isLocationMonitoring) {
+        messengerRef.current.sendLocatorShiftBegin(user.phoneNumber)
+          .catch(error => {
+            console.error('Failed to send shift begin message:', error);
+            toast.error(t('errors.failedToStartShift'));
+            setIsLocationMonitoring(false);
+          });
+      } else {
+        messengerRef.current.sendLocatorShiftFinished(user.phoneNumber)
+          .catch(error => {
+            console.error('Failed to send shift finished message:', error);
+            toast.error(t('errors.failedToEndShift'));
+          });
+      }
+    }
+  }, [isLocationMonitoring, user, t]);
+
+  useEffect(() => {
+    const checkServerConnection = () => {
+      if (messengerRef.current) {
+        const isConnected = messengerRef.current.isConnected();
+        setIsServerConnected(isConnected);
+        if (!isConnected) {
+          toast.error(t('errors.serverDisconnected'));
+        }
+      }
+    };
+
+    checkServerConnection();
+    const intervalId = setInterval(checkServerConnection, 60000); // Check every minute
+
+    return () => clearInterval(intervalId);
+  }, [t]);
 
   const toggleLocationMonitoring = () => {
     setIsLocationMonitoring(!isLocationMonitoring);
@@ -55,15 +111,48 @@ function Home() {
 
   const handleSOSAlarm = () => {
     setIsSOSAlarmActive(!isSOSAlarmActive);
+    if (!isSOSAlarmActive && user && user.phoneNumber) {
+      // Send SOS alarm when activated
+      messengerRef.current.sendLocatorAlarmSOS(user.phoneNumber, location.latitude, location.longitude)
+        .catch(error => {
+          console.error('Failed to send SOS alarm:', error);
+          toast.error(t('errors.failedToSendSOS'));
+          setIsSOSAlarmActive(false);
+        });
+    } else if (isSOSAlarmActive && user && user.phoneNumber) {
+      // Cancel SOS alarm when deactivated
+      messengerRef.current.sendLocatorAlarmCancel(user.phoneNumber, location.latitude, location.longitude)
+        .catch(error => {
+          console.error('Failed to cancel SOS alarm:', error);
+          toast.error(t('errors.failedToCancelSOS'));
+          setIsSOSAlarmActive(true);
+        });
+    }
   };
 
   const handlePreAlarmStart = () => {
     setIsPreAlarmActive(true);
     setPreAlarmTimeRemaining(300); // 5 minutes
+    if (user && user.phoneNumber) {
+      messengerRef.current.sendLocatorPreAlarm(user.phoneNumber, "Pre-alarm activated")
+        .catch(error => {
+          console.error('Failed to send pre-alarm:', error);
+          toast.error(t('errors.failedToStartPreAlarm'));
+          setIsPreAlarmActive(false);
+          setPreAlarmTimeRemaining(null);
+        });
+    }
   };
 
   const handleExtendPreAlarm = () => {
     setPreAlarmTimeRemaining(prev => prev + 300);
+    if (user && user.phoneNumber) {
+      messengerRef.current.sendLocatorPreAlarmExtended(user.phoneNumber)
+        .catch(error => {
+          console.error('Failed to extend pre-alarm:', error);
+          toast.error(t('errors.failedToExtendPreAlarm'));
+        });
+    }
   };
 
   const handleSettingsClick = () => {
@@ -71,12 +160,32 @@ function Home() {
   };
 
   const handleLogout = () => {
+    if (user && user.phoneNumber) {
+      messengerRef.current.sendLocatorAppExit(user.phoneNumber)
+        .catch(error => {
+          console.error('Failed to send app exit message:', error);
+        });
+    }
     logout();
     router.push('/login');
   };
 
   const handleAuthenticate = () => {
     // Implement authentication logic here
+  };
+
+  const handleReconnect = async () => {
+    setIsReconnecting(true);
+    try {
+      await messengerRef.current.reconnect();
+      toast.success(t('success.reconnected'));
+      setIsServerConnected(true);
+    } catch (error) {
+      console.error('Failed to reconnect:', error);
+      toast.error(t('errors.failedToReconnect'));
+    } finally {
+      setIsReconnecting(false);
+    }
   };
 
   const showToast = (message, type = 'default') => {
@@ -106,7 +215,17 @@ function Home() {
       <GeminiMessenger ref={messengerRef} />
       <header className="flex justify-between items-center mb-8">
         <div className="flex items-center">
-          <Wifi className="w-8 h-8 text-white mr-2" />
+          {isServerConnected ? (
+            <Wifi className="w-8 h-8 text-green-500 mr-2" />
+          ) : (
+            <Button
+              onClick={handleReconnect}
+              disabled={isReconnecting}
+              className="p-1 bg-red-500 hover:bg-red-600 rounded-full mr-2"
+            >
+              <WifiOff className="w-6 h-6 text-white" />
+            </Button>
+          )}
           <h1 className="text-2xl font-bold">{t('title')}</h1>
         </div>
         <div className="flex items-center">
