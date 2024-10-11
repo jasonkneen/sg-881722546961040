@@ -13,6 +13,16 @@ const nextConfig = async () => {
     experimental: {
       staticPageGenerationTimeout: 1000,
     },
+    // Force generation of pages for all locales
+    exportPathMap: async function (defaultPathMap, { dev, dir, outDir, locales, defaultLocale }) {
+      const paths = {};
+      for (const [path, config] of Object.entries(defaultPathMap)) {
+        for (const locale of locales) {
+          paths[`/${locale}${path}`] = { ...config, locale };
+        }
+      }
+      return paths;
+    },
   };
 };
 

@@ -9,6 +9,11 @@
     {
       "src": "/locales/(.*)",
       "dest": "/locales/$1"
+    },
+    {
+       "src": "/(.*)",
+      "dest": "/en/$1",
+      "continue": true
     }
   ]
 }
