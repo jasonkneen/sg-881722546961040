@@ -1,0 +1,53 @@
+{
+  "title": "Localizador Gemini",
+  "description": "Aplicación de monitoreo de ubicación y seguridad",
+  "loading": {
+    "checkingUserInfo": "Verificando información del usuario..."
+  },
+  "errors": {
+    "noPhoneNumber": "Por favor, añada un número de teléfono a su cuenta para usar esta aplicación."
+  },
+  "status": {
+    "on": "Activado",
+    "off": "Desactivado"
+  },
+  "menu": {
+    "settings": "Configuración",
+    "help": "Ayuda",
+    "about": "Acerca de",
+    "logout": "Cerrar sesión"
+  },
+  "buttons": {
+    "startMonitoring": "Monitoreo de ubicación",
+    "stopMonitoring": "Detener monitoreo",
+    "startPreAlarm": "Iniciar pre-alarma",
+    "stopPreAlarm": "Detener pre-alarma",
+    "sosAlarm": "Alarma SOS",
+    "extendPreAlarm": "Extender monitoreo de pre-alarma",
+    "authenticate": "Autenticar",
+    "cancel": "Cancelar",
+    "save": "Guardar"
+  },
+  "preAlarm": {
+    "monitoring": "Monitoreo de pre-alarma"
+  },
+  "modal": {
+    "close": "Cerrar"
+  },
+  "settings": {
+    "fetchError": "Error al obtener datos de configuración",
+    "loadError": "Error al cargar la configuración. Por favor, inténtelo de nuevo más tarde.",
+    "accountSettings": "Configuración de la cuenta",
+    "requirePinOnStopAlarm": "Requerir PIN para detener la alarma",
+    "phoneNumber": "Número de teléfono",
+    "applicationInfo": "Información de la aplicación",
+    "version": "Versión",
+    "alarmSettings": "Configuración de alarma",
+    "primaryReceiver": "Receptor principal",
+    "connectionTimeout": "Tiempo de espera de conexión (ms)",
+    "locationReportPeriod": "Período de informe de ubicación normal (s)",
+    "customizeVisibility": "Personalizar visibilidad de configuraciones",
+    "requirePinOnStopAlarm": "Requerir PIN para detener la alarma",
+    "version": "Versión"
+  }
+}

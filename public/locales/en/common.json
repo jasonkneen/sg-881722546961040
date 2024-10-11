@@ -1,0 +1,51 @@
+{
+  "title": "Gemini Locator",
+  "description": "Location monitoring and safety app",
+  "loading": {
+    "checkingUserInfo": "Checking user information..."
+  },
+  "errors": {
+    "noPhoneNumber": "Please add a phone number to your account to use this app."
+  },
+  "status": {
+    "on": "On",
+    "off": "Off"
+  },
+  "menu": {
+    "settings": "Settings",
+    "help": "Help",
+    "about": "About",
+    "logout": "Logout"
+  },
+  "buttons": {
+    "startMonitoring": "Location Monitoring",
+    "stopMonitoring": "Stop Monitoring",
+    "startPreAlarm": "Start Pre-Alarm",
+    "stopPreAlarm": "Stop Pre-Alarm",
+    "sosAlarm": "SOS Alarm",
+    "extendPreAlarm": "Extend Pre-Alarm Monitoring",
+    "authenticate": "Authenticate",
+    "cancel": "Cancel",
+    "save": "Save"
+  },
+  "preAlarm": {
+    "monitoring": "Pre-Alarm Monitoring"
+  },
+  "modal": {
+    "close": "Close"
+  },
+  "settings": {
+    "fetchError": "Failed to fetch settings data",
+    "loadError": "Failed to load settings. Please try again later.",
+    "accountSettings": "Account Settings",
+    "requirePinOnStopAlarm": "Require PIN on Stop Alarm",
+    "phoneNumber": "Phone Number",
+    "applicationInfo": "Application Info",
+    "version": "Version",
+    "alarmSettings": "Alarm Settings",
+    "primaryReceiver": "Primary Receiver",
+    "connectionTimeout": "Connection Timeout (ms)",
+    "locationReportPeriod": "Normal Location Report Period (s)",
+    "customizeVisibility": "Customize Settings Visibility"
+  }
+}
