@@ -25,18 +25,24 @@ function App({ Component, pageProps }) {
   );
 }
 
-App.getInitialProps = async ({ ctx, Component }) => {
+App.getInitialProps = async (appContext) => {
+  const { ctx, Component } = appContext;
   let pageProps = {};
 
-  if (Component.getInitialProps) {
+  if (Component && Component.getInitialProps) {
     pageProps = await Component.getInitialProps(ctx);
   }
 
   // Determine the language
-  const lng = ctx.req ? ctx.req.language : (typeof navigator !== 'undefined' ? navigator.language : 'en');
+  let lng = 'en'; // Default to English
+  if (ctx && ctx.req) {
+    lng = ctx.req.language || 'en';
+  } else if (typeof navigator !== 'undefined') {
+    lng = navigator.language.split('-')[0] || 'en';
+  }
   console.log('Detected language:', lng);
 
-  return { pageProps: { ...pageProps, lng: lng || 'en' } };
+  return { pageProps: { ...pageProps, lng } };
 };
 
 export default appWithTranslation(App);
