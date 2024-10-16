@@ -5,7 +5,11 @@
       "dest": "/locales/$1"
     },
     {
-       "src": "/(.*)",
+      "src": "/api/(.*)",
+      "dest": "/api/$1"
+    },
+    {
+      "src": "/(.*)",
       "dest": "/en/$1",
       "continue": true
     }
